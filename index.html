@@ -1186,18 +1186,78 @@ function renderNotes(){
       <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${TL_DOT[v]};vertical-align:middle;margin-right:3px"></span>${TL_LABEL[v]}</button>`;
   }).join('');
 
+  // Print settings variables — must be declared before filterBar
+  const printSettingsOpen=state.notesPrintSettingsOpen||false;
+  const printTopics=state.notesPrintTopics||[1,2,3,4,5,6];
+  const printMastery=state.notesPrintMastery||[0,1,2,3];
+  const printImages=state.notesPrintImages!==false;
+  const printSort=state.notesPrintSort||'topic';
+  const TL_DOT2={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const TL_LABEL2={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+
+  const topicChips=[1,2,3,4,5,6].map(t=>{
+    const on=(printTopics||[]).includes(t);
+    return`<button onclick="(function(){if(!state.notesPrintTopics)state.notesPrintTopics=[1,2,3,4,5,6];const i=state.notesPrintTopics.indexOf(${t});if(i>-1)state.notesPrintTopics.splice(i,1);else state.notesPrintTopics.push(${t});save(state);rerender()})()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?'var(--gray-700)':'var(--gray-200)'};background:${on?'var(--gray-900)':'#fff'};color:${on?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">T${t}</button>`;
+  }).join('');
+
+  const masteryChips2=[0,1,2,3].map(v=>{
+    const on=(printMastery||[]).includes(v);
+    return`<button onclick="(function(){if(!state.notesPrintMastery)state.notesPrintMastery=[0,1,2,3];const i=state.notesPrintMastery.indexOf(${v});if(i>-1)state.notesPrintMastery.splice(i,1);else state.notesPrintMastery.push(${v});save(state);rerender()})()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?TL_DOT2[v]:'var(--gray-200)'};background:${on?(v===0?'var(--gray-100)':v===1?'var(--red-light)':v===2?'var(--amber-light)':'var(--green-light)'):'#fff'};color:${on?(v===0?'var(--gray-600)':v===1?'var(--red-dark)':v===2?'var(--amber-dark)':'var(--green-dark)'):'var(--gray-500)'};cursor:pointer;font-family:inherit">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${TL_DOT2[v]};vertical-align:middle;margin-right:3px"></span>${TL_LABEL2[v]}</button>`;
+  }).join('');
+
+  const sortChips=['topic','mastery'].map(s=>{
+    const on=printSort===s;
+    return`<button onclick="state.notesPrintSort='${s}';save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?'var(--gray-700)':'var(--gray-200)'};background:${on?'var(--gray-900)':'#fff'};color:${on?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">${s==='topic'?'By topic':'By mastery'}</button>`;
+  }).join('');
+
   const filterBar=`<div style="margin-bottom:14px">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
-      <span style="font-size:11px;color:var(--gray-400)">Sort:</span>
-      ${btn('By topic','topic')}
-      ${btn('By mastery','mastery')}
-      ${btn('Images only','images')}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;justify-content:space-between">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--gray-400)">Sort:</span>
+        ${btn('By topic','topic')}
+        ${btn('By mastery','mastery')}
+        ${btn('Images only','images')}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a onclick="state.notesPrintSettingsOpen=!state.notesPrintSettingsOpen;save(state);rerender()" style="font-size:12px;color:var(--gray-400);cursor:pointer;text-decoration:underline;user-select:none">${printSettingsOpen?'Hide print settings':'Print settings'}</a>
+        <button class="btn primary" onclick="exportNotesPDF()" style="font-size:12px;padding:5px 12px">🖨 Print Summary</button>
+      </div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <span style="font-size:11px;color:var(--gray-400)">Filter:</span>
       ${masteryChips}
       ${notesMastery.length?`<button onclick="state.notesMastery=[];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">✕ Clear</button>`:''}
     </div>
+    ${printSettingsOpen?`<div class="card" style="margin-top:10px;background:var(--gray-50)">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Topics</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${topicChips}
+            <button onclick="state.notesPrintTopics=[1,2,3,4,5,6];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">All</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Mastery</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${masteryChips2}
+            <button onclick="state.notesPrintMastery=[0,1,2,3];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">All</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Sort</div>
+            <div style="display:flex;gap:5px">${sortChips}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Images</div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--gray-600)">
+              <input type="checkbox" ${printImages?'checked':''} onchange="state.notesPrintImages=this.checked;save(state)"/>
+              Include images
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>`:''}
   </div>`;
 
   // Get LP entries with notes
@@ -1274,8 +1334,9 @@ function noteRow(lp){
         </label>
         ${n.images&&n.images.length?`<span style="font-size:11px;color:var(--gray-400)">${n.images.length} image${n.images.length!==1?'s':''}</span>`:''}
       </div>
+      ${n.images&&n.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${n.images.map((img,idx)=>`<div style="position:relative"><img src="${img}" style="width:100px;height:75px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200)"/><button onclick="removeNoteImage(${lp.id},${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;line-height:1;padding:0">✕</button></div>`).join('')}</div>`:''}
     </div>
-    ${n.images&&n.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${n.images.map((img,idx)=>`<div style="position:relative"><img src="${img}" style="width:100px;height:75px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200);cursor:pointer" onclick="openNoteImage('${img}')"/><button onclick="removeNoteImage(${lp.id},${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;line-height:1;padding:0">✕</button></div>`).join('')}</div>`:''}
+    ${n.images&&n.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${n.images.map(img=>`<img src="${img}" style="width:100px;height:75px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200);cursor:pointer" onclick="openNoteImage('${img}')"/>`).join('')}</div>`:''}
   </div>`;
 }
 
@@ -2196,6 +2257,104 @@ function importProgress(input){
     }
   };
   reader.readAsText(file);
+}
+
+function exportNotesPDF(){
+  const notes=state.notes||{};
+  const TL_COLOR={0:'#9ca3af',1:'#dc2626',2:'#d97706',3:'#16a34a'};
+  const TL_LABEL={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+  const TNAMES_SHORT=['T1: Cardiovascular & Respiratory','T2: Gastroenterology & Renal','T3: Neurology, Endocrinology & Diabetes','T4: Rheumatology, Older Person\'s Health & Palliative Care','T5: Infectious Disease, Sexual Health & Dermatology','T6: Oncology & Haematology'];
+
+  const printTopics=state.notesPrintTopics||[1,2,3,4,5,6];
+  const printMastery=state.notesPrintMastery||[0,1,2,3];
+  const printImages=state.notesPrintImages!==false;
+  const printSort=state.notesPrintSort||'topic';
+
+  const noteEntries=state.allLPs.filter(lp=>{
+    const n=notes[lp.id];
+    if(!n||(!n.text&&!(n.images&&n.images.length))) return false;
+    if(!printTopics.includes(lp.topic)) return false;
+    if(!printMastery.includes(getMastery(lp.id))) return false;
+    return true;
+  });
+
+  if(!noteEntries.length){
+    const msg=document.getElementById('import-msg');
+    if(msg){msg.style.display='';msg.style.color='var(--amber-dark)';msg.textContent='No notes match the selected filters.';}
+    return;
+  }
+
+  const noteCount=noteEntries.length;
+  const topicSet=new Set(noteEntries.map(l=>l.topic));
+  const exportDate=new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+  let bodyHtml='';
+  if(printSort==='mastery'){
+    [3,2,1,0].forEach(mv=>{
+      const group=noteEntries.filter(lp=>getMastery(lp.id)===mv);
+      if(!group.length) return;
+      bodyHtml+=`<div class="topic-section"><div class="topic-heading"><span class="mastery-dot" style="background:${TL_COLOR[mv]}"></span>${TL_LABEL[mv]}</div>`;
+      group.forEach(lp=>{bodyHtml+=lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages);});
+      bodyHtml+='</div>';
+    });
+  } else {
+    TNAMES_SHORT.forEach((tname,ti)=>{
+      const t=ti+1;
+      const topicLps=noteEntries.filter(lp=>lp.topic===t);
+      if(!topicLps.length) return;
+      bodyHtml+=`<div class="topic-section"><div class="topic-heading">${tname}</div>`;
+      topicLps.forEach(lp=>{bodyHtml+=lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages);});
+      bodyHtml+='</div>';
+    });
+  }
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>JMP 2026 Study Notes</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#fff;font-family:Georgia,serif;color:#1a1a1a;padding:40px 48px;max-width:800px;margin:0 auto}
+    .page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:24px}
+    .page-meta{font-size:11px;color:#aaa;font-family:Arial,sans-serif}
+    .topic-section{margin-bottom:24px}
+    .topic-heading{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;font-family:Arial,sans-serif;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:6px}
+    .lp-block{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f3f4f6;page-break-inside:avoid}
+    .lp-block:last-child{border-bottom:none}
+    .lp-text{font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.5;margin-bottom:3px;font-family:Arial,sans-serif}
+    .lp-meta{font-size:10px;color:#aaa;margin-bottom:8px;font-family:Arial,sans-serif;display:flex;align-items:center;gap:6px}
+    .mastery-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .note-text{font-size:13px;color:#333;line-height:1.75;white-space:pre-wrap;font-family:Georgia,serif}
+    .img-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .img-thumb{width:calc(50% - 5px);max-width:280px;max-height:200px;object-fit:contain;border:1px solid #e5e7eb;border-radius:4px}
+    .footer{margin-top:32px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;font-size:10px;color:#bbb;font-family:Arial,sans-serif}
+    @media print{body{padding:20px 30px}.lp-block{page-break-inside:avoid}.page-header{position:running(header)}}
+  </style>
+  </head><body>
+  <div class="page-header">
+    <div class="page-meta">JMP 2026 Study Notes &nbsp;·&nbsp; Year 4 Medicine &nbsp;·&nbsp; Exported ${exportDate}</div>
+  </div>
+  ${bodyHtml}
+  <div class="footer"><span>JMP 2026 Study Planner</span><span>Exported ${exportDate} &nbsp;·&nbsp; ${noteCount} note${noteCount!==1?'s':''}</span></div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
+function lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages){
+  const n=notes[lp.id];
+  const m=getMastery(lp.id);
+  const imagesHtml=printImages&&n.images&&n.images.length
+    ?`<div class="img-row">${n.images.map(img=>`<img src="${img}" class="img-thumb"/>`).join('')}</div>`:'';
+  return`<div class="lp-block">
+    <div class="lp-text">${lp.text}</div>
+    <div class="lp-meta">
+      <span class="mastery-dot" style="background:${TL_COLOR[m]}"></span>
+      <span>${TL_LABEL[m]} &middot; ${COLS[lp.col]}</span>
+    </div>
+    ${n.text?`<div class="note-text">${n.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}
+    ${imagesHtml}
+  </div>`;
 }
 
 function exportNotes(){
