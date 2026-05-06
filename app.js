@@ -1,0 +1,2638 @@
+const TNAMES=["T1: Cardiovascular & Respiratory","T2: Gastroenterology & Renal","T3: Neurology, Endocrinology & Diabetes","T4: Rheumatology, Older Person's Health & Palliative Care","T5: Infectious Disease, Sexual Health & Dermatology","T6: Oncology & Haematology"];
+const COLS={CP:"Clinical Practice",SS:"Science & Scholarship",HSE:"Health, Society & Environment",PD:"Professional Development"};
+// RAW: [topic, col, text, [[linkLabel, url], ...]]
+// ADDITIONAL: [topic, label, url]  — additional/supplementary readings
+const RAW=[
+[1,"CP","Analyse clinical features, severity markers, pathophysiology, investigations and management of common arrhythmias; compare emergency vs non-emergency management.",[["Life in the Fast Lane ECG Library","https://litfl.com/ecg-library/"],["ECI NSW — Cardiology resources","https://aci.health.nsw.gov.au/networks/eci/clinical/clinical-tools/cardiology"]]],
+[1,"CP","Assess atrial fibrillation: clinical presentation, severity markers, investigations and principles of management; compare pathophysiology with atrial flutter and other atrial arrhythmias.",[["Brieger MJA 2018 — AF guidelines","https://www.mja.com.au/journal/2018/209/8/national-heart-foundation-australia-and-cardiac-society-australia-and-new"],["Brieger MJA 2018 — CHA2DS2-VA scoring","https://onlinelibrary-wiley-com.ezproxy.newcastle.edu.au/doi/10.5694/mja18.00646"]]],
+[1,"CP","Construct indications, complications and contraindications for anticoagulation; explain evidence for stroke prevention in AF and prosthetic heart valves; contrast with antiplatelet therapy.",[["CSANZ 2025 — Management of ACS","https://www.heartfoundation.org.au/for-professionals/acs-guideline"]]],
+[1,"CP","Tabulate causes and clinical features of systolic and diastolic murmurs; outline investigations and management of valvular conditions including prosthetic valve complications.",[]],
+[1,"CP","Analyse haemoptysis: clinical features, risk factors, causes, investigative approach, red flag symptoms/signs, and emergency management of large-volume haemoptysis.",[]],
+[1,"CP","Evaluate obstructive and central sleep apnoea: presentation, risk factors, complications, causes, investigations and management; critique utility/limitations of common screening tools; compare therapeutic approaches by severity.",[["Mansfield MJA 2013 — How to assess and treat adult OSA","https://www.mja.com.au/journal/2013/199/8/how-assess-diagnose-refer-and-treat-adult-obstructive-sleep-apnoea-commentary"],["Austroads AP-G56-17 — Assessing fitness to drive","https://austroads.com.au/publications/assessing-fitness-to-drive/ap-g56/roles-and-responsibilities"]]],
+[1,"CP","Outline bronchiectasis: causes, clinical presentation, investigations and management principles; develop long-term care plan addressing exacerbation prevention and patient education.",[]],
+[1,"CP","Analyse recurrent pneumonias including cystic fibrosis: clinical features, investigations, complications, management; interpret diagnostic results; appraise role of MDT.",[["Cystic Fibrosis Australia — Diagnosis","https://www.cysticfibrosis.org.au/diagnosis/"]]],
+[1,"SS","Identify CXR abnormalities: pneumothorax, lung collapse, changes of tuberculosis.",[]],
+[1,"SS","Interpret TB investigations: Mantoux / QuantiFERON Gold, sputum AFB and PCR testing.",[]],
+[1,"SS","Interpret ABGs; define Type 1 vs Type 2 respiratory failure.",[]],
+[1,"SS","Identify ECG features of: AF, SVT, VT, long QT syndromes, Brugada syndrome, Wolff-Parkinson-White, and acute coronary syndromes.",[]],
+[1,"SS","Describe indications for amiodarone and its side effects; contrast with other anti-arrhythmic medications.",[]],
+[1,"SS","Recognise drugs which can lead to arrhythmias.",[]],
+[1,"SS","Calculate CHA2DS2-VA score and determine anticoagulation need in clinical scenarios.",[["Brieger MJA 2018 — CHA2DS2-VA calculator","https://onlinelibrary-wiley-com.ezproxy.newcastle.edu.au/doi/10.5694/mja18.00646"]]],
+[1,"SS","Evaluate indications, complications and mechanism of anti-resorptive and CFTR therapies in cystic fibrosis.",[]],
+[1,"HSE","Identify risk factors for Rheumatic Heart Disease; justify rationale for NSW RHD Register.",[["NSW RHD Register — RHD Australia","https://www.rhdaustralia.org.au/new-south-wales"]]],
+[1,"HSE","Evaluate use of antibiotic prophylaxis for infective endocarditis.",[["AIMED — Choosing Wisely 2015: Antibiotic prophylaxis for infective endocarditis","https://aimed.net.au/2015/09/14/choosing-wisely-antibiotic-prophylaxis-for-prevention-of-infective-endocarditis/"]]],
+[1,"HSE","Evaluate global impact of TB, growing drug resistance, and link between TB and HIV.",[["WHO Fact Sheet 2018 — Tuberculosis","https://www.who.int/news-room/fact-sheets/detail/tuberculosis"]]],
+[1,"HSE","Evaluate role of newborn screening, sweat testing, CFTR genetic testing and pulmonary function testing in cystic fibrosis.",[["Cystic Fibrosis Australia — Diagnosis","https://www.cysticfibrosis.org.au/diagnosis/"]]],
+[1,"PD","Justify why investigations should be rationalised for a patient presenting with palpitations.",[["Ling, Medicine Today 2015 — Clinical investigations from the RACP","https://medicinetoday.com.au/sites/default/files/cpd/MT2015-10-043-LING.pdf"]]],
+[1,"PD","Demonstrate how to communicate implications of a new OSA diagnosis to a truck driver (fitness-to-drive context).",[["Austroads AP-G56-17 — Fitness to drive","https://austroads.com.au/publications/assessing-fitness-to-drive/ap-g56/roles-and-responsibilities"]]],
+[2,"CP","Evaluate clinical presentation, common triggers, red flag features, investigations and management of GORD, H. pylori infection and dyspepsia; differentiate based on clinical/investigative findings.",[["NPS Medicinewise — Managing GORD with PPIs","https://www.nps.org.au/professionals/managing-gord-with-ppis-in-primary-care"],["NPS Medicinewise — Functional dyspepsia","https://www.nps.org.au/australian-prescriber/articles/functional-dyspepsia"]]],
+[2,"CP","Tabulate indications, contraindications and complications of endoscopy and colonoscopy; appraise appropriateness of endoscopic procedures in various clinical scenarios.",[]],
+[2,"CP","Analyse common causes, clinical features and red flags for nausea and vomiting; evaluate commonly used antiemetics including mechanism of action and side effects.",[["UpToDate — Approach to nausea and vomiting (algorithm)","https://www.uptodate.com.acs.hcn.com.au/contents/image?imageKey=GAST%2F78422"],["Bristol Stool Chart — Continence Foundation of Australia","https://www.continence.org.au/pages/bristol-stool-chart.html"]]],
+[2,"CP","Compare and contrast clinical presentation, complications, investigations and management of IBD vs other causes of bloody diarrhoea; justify antibiotic therapy based on clinical indications.",[]],
+[2,"CP","Describe clinical features, causes, investigations and management of haematemesis; identify red flag signs; evaluate and contrast management of peptic ulcer bleeding vs oesophageal variceal bleeding.",[["MDCalc — Rockall Score for Upper GI Bleeding","https://www.mdcalc.com/rockall-score-upper-gi-bleeding-pre-endoscopy"]]],
+[2,"CP","Critically appraise differential diagnosis of abdominal bloating and loose bowel motions incorporating red flag features; design evidence-based management plan for IBS with patient-centred care.",[]],
+[2,"CP","Evaluate causes, assessment strategies, investigations and emergency management of acute renal failure; justify indications and methods of renal replacement therapy and potential complications.",[]],
+[2,"CP","Analyse clinical presentation, underlying causes and investigative approaches for haematuria and/or proteinuria; categorise causes by microscopic/macroscopic origin and anatomical location.",[["Kidney Health Australia — CKD detection algorithm 2021","https://kidney.org.au/uploads/resources/Algorithm-for-initial-detection-of-CKD_2021_logo.pdf"]]],
+[2,"CP","Formulate management plan for acute electrolyte abnormalities including hyperkalaemia and hypokalaemia; critique risks and benefits of oral vs IV options.",[]],
+[2,"CP","Appraise causes, staging, complications and management strategies for chronic renal failure; compare options for renal replacement therapy including dialysis modalities and transplantation.",[["Kidney Health Australia — My Kidneys My Choice decision aid","https://kidney.org.au/your-kidneys/support/kidney-disease/treatment/choosing-your-treatment"]]],
+[2,"CP","Differentiate haemoglobinuria from myoglobinuria based on causes, clinical/lab findings and management; develop management plan for rhabdomyolysis.",[]],
+[2,"SS","Accurately examine fluid status: clinical features of dehydration and fluid overload; contrast expected electrolyte, creatinine and urea results in dehydration vs upper GI bleeding.",[]],
+[2,"SS","Identify features of electrolyte disturbance on ECG: hyperkalaemia and hypokalaemia.",[]],
+[2,"SS","Assess how renal impairment and extremes of body weight influence medication pharmacokinetics; evaluate appropriate prescribing adjustments for antibiotics and anticoagulants.",[]],
+[2,"SS","Formulate own diagnostic algorithm for nausea and vomiting.",[["UpToDate — Diagnostic algorithm: nausea and vomiting","https://www.uptodate.com.acs.hcn.com.au/contents/image?imageKey=GAST%2F78422"]]],
+[2,"SS","Assess patient's stool using the Bristol Stool Chart.",[["Continence Foundation of Australia — Bristol Stool Chart","https://www.continence.org.au/pages/bristol-stool-chart.html"]]],
+[2,"SS","Calculate and interpret the adapted Rockall Score.",[["MDCalc — Rockall Score for Upper GI Bleeding","https://www.mdcalc.com/rockall-score-upper-gi-bleeding-pre-endoscopy"]]],
+[2,"SS","Interpret Hepatitis B and C serology and explain results to a patient.",[["ASHM 2015 — Decision making in HBV","https://ashm.org.au/products/product/1976963402"]]],
+[2,"SS","Draw and label an algorithm flow chart of a kidney health check.",[["Kidney Health Australia — CKD detection algorithm 2021","https://kidney.org.au/uploads/resources/Algorithm-for-initial-detection-of-CKD_2021_logo.pdf"]]],
+[2,"HSE","Evaluate the Australian bowel cancer screening program for asymptomatic patients and barriers to uptake; define appropriate actions if FOBT is positive.",[["Cancer Council Australia — Colorectal cancer screening guidelines 2017","https://wiki.cancer.org.au/australia/Guidelines:Colorectal_cancer/Population_screening_recommendations"]]],
+[2,"HSE","Describe how Hepatitis C can be eradicated in Australia; explain how barriers to accessing treatment have been addressed.",[["Kwon, Journal of Viral Hepatitis 2018 — HCV eradication in Australia","https://onlinelibrary.wiley.com/doi/epdf/10.1111/jvh.13013"]]],
+[2,"PD","Formulate strategies for communicating, displaying and delivering information about a medical condition to suit varying levels of health literacy.",[["GESA — Patient information resources","https://www.gesa.org.au/education/patient-resources/"]]],
+[2,"PD","Evaluate how doctors should best deliver evidence-based information to patients, using management options for end-stage CKD as an example.",[["Kidney Health Australia — My Kidneys My Choice decision aid","https://kidney.org.au/your-kidneys/support/kidney-disease/treatment/choosing-your-treatment"]]],
+[3,"CP","Compare and contrast clinical presentation, initial and definitive investigations, and emergency management of vasovagal syncope, cardiac syncope, and seizures.",[["Angus-Leppan BMJ 2014 — First seizures in adults","https://www.bmj.com/content/348/bmj.g2470.long"]]],
+[3,"CP","Categorise causes and clinical features of seizures including seizure subtypes; outline appropriate investigations and expected findings.",[]],
+[3,"CP","Analyse clinical presentation and common causes of primary and secondary headache; determine appropriate investigations based on red flag features and headache subtype.",[["HNE Healthpathways — Headaches: initial management","https://hne.communityhealthpathways.org/43696.htm"],["HNE Healthpathways — Useful questions for headache history","https://hne.communityhealthpathways.org/19994.htm"],["Australian Prescriber — Migraine management","https://australianprescriber.tg.org.au/articles/migraine-management.html"]]],
+[3,"CP","Evaluate clinical presentation, pathophysiology, causes, investigation and management of: unilateral/bilateral ophthalmoplegia, ptosis, facial nerve palsy, internuclear ophthalmoplegia, Horner's syndrome, 3rd nerve palsy, optic neuritis, multiple sclerosis, wasting of small muscles of the hand, carpal tunnel syndrome, peripheral neuropathy (incl. red flags), polyneuropathy and plexopathy, mononeuritis multiplex, foot drop.",[["Bilyk, Review of Ophthalmology 2012 — How to spot and treat dangerous ptosis","https://www.reviewofophthalmology.com/article/how-to-spot-and-treat-dangerous-ptosis"],["Phan, Australian Family Physician 2016 — General practice approach to Bell's palsy","https://www.racgp.org.au/afp/2016/november/a-general-practice-approach-to-bell%E2%80%99s-palsy/"]]],
+[3,"CP","Identify and assess muscle weakness without sensory features: proximal myopathy, myasthenia gravis, Lambert-Eaton syndrome, and motor neuron disease.",[["NHS Guidelines 2023 — Myasthenia Gravis management","https://www.nhs.uk/conditions/myasthenia-gravis/treatment/"],["MND Australia 2016 — MND Diagnostic Tool","https://www.mndcare.net.au/Documents/Red-Flags/MND_Diagnostic_Tool_FINAL.aspx"]]],
+[3,"CP","Assess and analyse: Type 1 & 2 diabetes mellitus, LADA, drug-induced hyperglycaemia, hyperparathyroidism, hypercalcaemia (including emergency management), and diabetes insipidus.",[]],
+[3,"CP","Assess and analyse endocrinopathies presenting as: 'anxiety and palpitations', 'flushing and diarrhoea', 'hunger and shaking', 'fatigue'; including hyperthyroidism, hypothyroidism, hyperparathyroidism, primary/secondary adrenal insufficiency, and phaeochromocytoma.",[["Gargya, Internal Medicine Journal 2016 — Prescribing glucocorticoids in emergency setting","https://www.ncbi.nlm.nih.gov/pubmed/26968598#"],["HNE Healthpathways — Long-term therapeutic glucocorticoids (patient info)","https://hne.communityhealthpathways.org/files/patientinfo/LongTermTherapeuticGlucocorticoidsPI.pdf"]]],
+[3,"CP","Assess osteoporosis and osteopenia: clinical features, causes, investigations, management; justify use of calcium, vitamin D and anti-resorptive therapies.",[["FRAX WHO — Fracture risk calculator","https://www.sheffield.ac.uk/FRAX/tool.aspx?country=31"],["Garvan Institute — Bone fracture risk calculator","https://www.garvan.org.au/promotions/bone-fracture-risk/calculator/"]]],
+[3,"CP","Evaluate testosterone deficiency: clinical presentation, causes and diagnostic approach including genetic syndromes (e.g. Klinefelter syndrome).",[]],
+[3,"CP","Understand principles of initiating testosterone and oestrogen therapy in cisgender and transgender/gender-diverse individuals; appraise risks, benefits and monitoring strategies.",[["Cheung, MJA 2019 — Hormonal management of transgender and gender diverse individuals","https://onlinelibrary.wiley.com/doi/abs/10.5694/mja2.50259"],["RACP/AJGP 2020 — Hormone therapy for trans- and gender-diverse patients","https://www1.racgp.org.au/ajgp/2020/july/hormone-therapy-for-trans-and-gender-diverse-patie"]]],
+[3,"SS","Tabulate pharmacological agents used to terminate and prevent seizures and their common side effects.",[["NICE Epilepsy overview 2019","https://pathways.nice.org.uk/pathways/epilepsy"]]],
+[3,"SS","Identify and list common causes of drug-induced seizures.",[]],
+[3,"SS","Formulate an initial management plan tailored to headache aetiology and severity.",[["HNE Healthpathways — Headaches","https://hne.communityhealthpathways.org/43696.htm"]]],
+[3,"SS","List common management strategies used in migraine.",[["Australian Prescriber — Migraine Management","https://australianprescriber.tg.org.au/articles/migraine-management.html"]]],
+[3,"SS","Assess plasma and urine osmolarity: calculate plasma osmolarity, understand osmolar gap, interpret urine specific gravity.",[["MDCalc — Serum osmolality/osmolarity","https://www.mdcalc.com/serum-osmolality-osmolarity"]]],
+[3,"SS","Correctly prescribe glucocorticoids in an emergency setting: list corticosteroid equivalents and prescribe in an unwell patient.",[["Gargya, Internal Medicine Journal 2016","https://www.ncbi.nlm.nih.gov/pubmed/26968598#"]]],
+[3,"SS","Request appropriate thyroid imaging: indications for Technetium pertechnetate and thyroid ultrasound.",[["Lee, Australian Family Physician 2012 — Thyroid scans","https://www.racgp.org.au/afp/2012/august/thyroid-scans/"]]],
+[3,"SS","Learn to calculate fracture risk (FRAX / Garvan tools).",[["FRAX WHO fracture risk calculator","https://www.sheffield.ac.uk/FRAX/tool.aspx?country=31"],["Garvan Institute fracture risk calculator","https://www.garvan.org.au/promotions/bone-fracture-risk/calculator/"]]],
+[3,"HSE","Evaluate global impact of leprosy as a leading cause of peripheral neuropathy in the developing world.",[["WHO Fact Sheet 2019 — Leprosy","https://www.who.int/en/news-room/fact-sheets/detail/leprosy"]]],
+[3,"HSE","Evaluate how discrimination impacts the health of the trans and gender diverse community in NSW.",[["ACON NSW 2019 — NSW Blueprint for TGD health","https://www.acon.org.au/wp-content/uploads/2019/04/ACON-TGD-Health-Blueprint-Booklet.pdf"]]],
+[3,"PD","Justify principles of assessing cost-effectiveness before approving new treatment, using multiple sclerosis as an example.",[["Broadley, MJA 2015 — New era of treatment for multiple sclerosis","https://www.mja.com.au/journal/2015/203/3/new-era-treatment-multiple-sclerosis"]]],
+[3,"PD","Formulate a strategy to support doctors in making a diagnosis of an uncommon condition, using motor neurone disease as an example.",[["MND Australia 2016 — MND Diagnostic Tool","https://www.mndcare.net.au/Documents/Red-Flags/MND_Diagnostic_Tool_FINAL.aspx"]]],
+[3,"PD","Formulate an effective strategy for communication between different parts of the health service.",[["HNE Healthpathways — Long-term therapeutic glucocorticoids patient info","https://hne.communityhealthpathways.org/files/patientinfo/LongTermTherapeuticGlucocorticoidsPI.pdf"]]],
+[4,"CP","Analyse clinical presentation (distribution and extra-articular manifestations), causes, investigations and management of non-inflammatory and inflammatory joint pathology — including septic arthritis, reactive arthritis, RA, gout, pseudogout, SLE-related arthritis and psoriatic arthritis.",[["Tidy, Patient Info 2017 — Acute Monoarthritis","https://patient.info/doctor/acute-monoarthritis"],["eTG Complete — Assessing peripheral musculoskeletal symptoms in adults","https://tgldcdp.tg.org.au.acs.hcn.com.au/viewTopic?topicfile=assessing-peripheral-musculoskeletal-symptoms-in-adults"],["RACGP Guideline — Management of Hip and Knee Osteoarthritis","https://www.racgp.org.au/clinical-resources/clinical-guidelines/key-racgp-guidelines/view-all-racgp-guidelines/knee-and-hip-osteoarthritis"]]],
+[4,"CP","Assess and analyse: polymyalgia rheumatica, fibromyalgia, giant cell arteritis, polymyositis, dermatomyositis — presentation, causes, red flag features, investigations and management.",[]],
+[4,"CP","Assess and analyse in elderly patients: elder abuse (red flag features and types), malnutrition and vitamin deficiency, refeeding syndrome (including emergency management), falls, delirium (pharmacological and non-pharmacological strategies).",[]],
+[4,"CP","Assess symptoms and signs of dying including physical, psychological and spiritual dimensions; formulate management strategies for: agitation, dyspnoea, nausea, pain, bowel obstruction and seizures.",[["CEC — Last Days of Life Anticipatory Prescribing Recommendations 2017","http://www.cec.health.nsw.gov.au/__data/assets/pdf_file/0005/359339/LDOL-Anticipatory-Prescribing-Guide-April-2017.PDF"]]],
+[4,"CP","Explain and rationalise use or avoidance of investigations and medications in end-of-life care; evaluate appropriateness of therapeutic interventions based on goals of care, patient comfort and ethical considerations.",[["CEC — Guidance for Prescribing Last Days of Life Medicine 2017","https://www.cec.health.nsw.gov.au/__data/assets/pdf_file/0007/359269/LDOL-Toolkit-Implementation-Guide-Prescribing-Last-Days-of-Life-Medications.pdf"],["NSW CEC — Last Days of Life toolkit","https://www.cec.health.nsw.gov.au/improve-quality/teamwork-culture-pcc/person-centred-care/end-of-life/last-days-of-life"]]],
+[4,"SS","Analyse vasculitis disorders: clinical features and pathophysiology; list signs and symptoms; categorise by vessel size and organ affected.",[["ASCIA — Vasculitis disorders","https://www.allergy.org.au/images/pcc/ASCIA_PCC_Vasculitis_disorders_2019.pdf"]]],
+[4,"SS","Understand principles of analgesia prescribing with reference to the WHO analgesic ladder.",[["WHO — Cancer Pain Relief (analgesic ladder)","https://iris.who.int/bitstream/10665/43944/1/9241561009_eng.pdf"]]],
+[4,"SS","Explain anticipatory prescribing in palliative care: list medications and their use.",[["CEC — Last Days of Life Anticipatory Prescribing Recommendations 2017","http://www.cec.health.nsw.gov.au/__data/assets/pdf_file/0005/359339/LDOL-Anticipatory-Prescribing-Guide-April-2017.PDF"]]],
+[4,"SS","Critique strategies to prevent falls in and out of hospitals — environmental, pharmacological and rehabilitative approaches.",[]],
+[4,"HSE","Evaluate the cost of osteoarthritis in Australia and population-based health strategies.",[["University of Sydney 2018 — How to cut the $23 billion bill for osteoarthritis","https://sydney.edu.au/news-opinion/news/2018/11/28/how-to-cut-the--23-billion-bill-for-osteoarthritis.html"]]],
+[4,"HSE","Justify deprescribing of medication in the frail elderly.",[["NPS Medicinewise — Prescribing for frail older people (Hilmer and Gnjidic 2017)","https://www.nps.org.au/australian-prescriber/articles/prescribing-for-frail-older-people"]]],
+[4,"HSE","Describe principles of care from the NSW CEC 'Last Days of Life' toolkit.",[["NSW CEC — Last Days of Life","https://www.cec.health.nsw.gov.au/improve-quality/teamwork-culture-pcc/person-centred-care/end-of-life/last-days-of-life"]]],
+[4,"PD","Understand that not all diseases fit a specific pattern; describe how this impacts patients using systemic rheumatic diseases and overlap syndromes as an example.",[["UpToDate — Undifferentiated systemic rheumatic diseases and overlap syndromes","https://www.uptodate.com.acs.hcn.com.au/contents/image?imageKey=RHEUM%2F55672"]]],
+[4,"PD","Formulate a strategy to promote an evidence-based change in practice using prescribing opiates as an example.",[["Hunter New England Health 2020 — Reconsidering opioids","https://www.hnehealth.nsw.gov.au/__data/assets/pdf_file/0020/420644/Reconsidering_opioids_September_2020.pdf"]]],
+[4,"PD","Demonstrate how to approach a consultation with a patient with a life-limiting chronic disease in their last year of life; evaluate physical and psychological needs.",[["Caresearch — Palliative care knowledge network 2017","https://www.caresearch.com.au/caresearch/tabid/1507/Default.aspx#pep"]]],
+[4,"PD","Discuss the potential impact of working with severely unwell or dying patients; develop strategies to support junior doctors.",[["NSW Government — Your training and wellbeing matters: NSW JMO survey 2018","https://www.health.nsw.gov.au/workforce/culture/Documents/yts-2018-jmo.pdf"]]],
+[4,"PD","Read about caring for Aboriginal or Torres Strait Islander people through death and dying (Sad News, Sorry Business guidelines).",[]],
+[5,"CP","Analyse infectious aetiologies of sudden-onset diarrhoea with fever and abdominal pain; differentiate viral, bacterial and parasitic causes; compare clinical features, investigation and management; identify complications and red flag features.",[["HNE Healthpathways — Infectious gastroenteritis control: testing guide","https://hne.communityhealthpathways.org/files/Resources/Infectious%20Gastroenteritis%20Testing%20Guide.pdf"]]],
+[5,"CP","Define and distinguish fever of unknown origin from other febrile syndromes; describe common causes and clinical features; formulate appropriate initial investigation plan.",[]],
+[5,"CP","Evaluate clinical features, routes of transmission, risk factors and complications of respiratory viruses (COVID-19 and influenza A); interpret investigations in context of disease severity.",[["Jones, Cochrane Database 2012 — Antiviral therapy and public health interventions for influenza","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6464969/"]]],
+[5,"CP","Develop evidence-based management plan including antiviral therapy, supportive care and public health interventions (vaccination, isolation protocols).",[]],
+[5,"CP","Assess patients with infectious diarrhoea: identify red flag features indicating severe or complicated disease including systemic involvement and dehydration.",[]],
+[5,"CP","Analyse clinical features and underlying causes of recurrent or unusually severe infections in adults; evaluate appropriate investigations.",[]],
+[5,"CP","List and justify indications for HIV testing; describe clinical features of acute retroviral syndrome; categorise common opportunistic infections in HIV with low CD4 count.",[["ASHM 2015 — Decision making in PrEP – NSW","https://ashm.org.au/products/product/3000555592"]]],
+[5,"CP","Explain role and mechanism of PrEP and PEP; outline indications; discuss importance of patient education and opportunistic STI screening.",[["ASHM 2017 — Informed consent for HIV testing","http://testingportal.ashm.org.au/hiv/informed-consent-for-testing"],["NSW Health — STI/HIV Testing Tool 2017","https://aci.health.nsw.gov.au/__data/assets/pdf_file/0009/286857/STI-HIV-Testing-Tool-online.pdf"]]],
+[5,"CP","Analyse clinical features and underlying causes of abnormal skin pigmentation and dermal plaques; evaluate and prioritise appropriate investigations.",[["NEJM 2013 — How to perform a punch biopsy of the skin","https://www.nejm.org/doi/full/10.1056/NEJMvcm1105849"]]],
+[5,"CP","Identify dermatological conditions associated with systemic disease; describe skin conditions associated with malignancy; describe management of non-resectable or metastatic melanomatous and non-melanomatous skin cancers.",[]],
+[5,"SS","Prioritise investigations for infectious gastroenteritis.",[["HNE Healthpathways — Infectious gastroenteritis testing guide","https://hne.communityhealthpathways.org/files/Resources/Infectious%20Gastroenteritis%20Testing%20Guide.pdf"]]],
+[5,"SS","Understand indications, contraindications and complications in performing a skin biopsy.",[["NEJM 2013 — How to perform a punch biopsy of the skin","https://www.nejm.org/doi/full/10.1056/NEJMvcm1105849"]]],
+[5,"SS","Describe pathophysiology for hypersensitivity reactions; outline investigation of suspected allergy and principles of desensitisation; understand role of genetic testing in drug reactions.",[["RACGP AFP 2013 — Adverse drug reactions","https://www.racgp.org.au/afp/2013/january-february/adverse-drug-reactions"]]],
+[5,"HSE","Critique strategies used to prepare for respiratory viral pandemics.",[["RACGP — Managing pandemic influenza in general practice","https://www.racgp.org.au/running-a-practice/practice-management/managing-emergencies-and-pandemics/managing-pandemics/managing-pandemic-influenza-in-general-practic-1"]]],
+[5,"HSE","Evaluate impact of HIV/AIDS as a major global health issue.",[["WHO Fact Sheet 2019 — HIV/AIDS","https://www.who.int/news-room/fact-sheets/detail/hiv-aids"]]],
+[5,"HSE","Evaluate contribution of skin conditions to the global burden of disease.",[["Karimkhani, JAMA Dermatology 2017","https://jamanetwork.com/journals/jamadermatology/fullarticle/2604831"]]],
+[5,"PD","Describe responsibility of medical practitioners to inform the public health unit of notifiable diseases.",[["NSW Health — Disease notification","https://www.health.nsw.gov.au/Infectious/Pages/notification.aspx"]]],
+[5,"PD","Describe best practice for informed consent when testing for HIV; outline clinician and patient obligations regarding a positive result; outline need for post-test counselling.",[["ASHM 2017 — Informed consent for HIV testing","http://testingportal.ashm.org.au/hiv/informed-consent-for-testing"],["NSW Health Public Health Act 2017","https://www.health.nsw.gov.au/phact/Pages/phanotification.aspx"]]],
+[5,"PD","Evaluate psychological impact of diseases visible to others, using vitiligo as an example.",[["Wittal, Australasian College of Dermatologists — A to Z of skin: Vitiligo","https://www.dermcoll.edu.au/atoz/vitiligo/"]]],
+[6,"CP","Analyse clinical features, investigations, staging and management principles of small cell and non-small cell lung cancer; describe pulmonary and extra-pulmonary manifestations, paraneoplastic syndromes and common sites of metastasis.",[["Cancer Australia 2012 — Investigating lung cancer: algorithm for GPs","https://canceraustralia.gov.au/sites/default/files/publications/lung-cancer-gp-guide-2012_509ae0cdd2e36.pdf"]]],
+[6,"CP","Analyse clinical features, common sites of metastasis, investigation/staging and management principles of colorectal carcinoma.",[["Cancer Council — Optimal care pathway for colorectal cancer 2016","https://www.cancer.org.au/content/ocp/quick/colorectal-cancer-quick-reference-guide-june2016.pdf"]]],
+[6,"CP","Compare clinical features, investigation/staging and management of breast cancer and prostate cancer.",[]],
+[6,"CP","Identify and describe clinical features, investigation and emergency management of oncological emergencies: spinal cord compression, pathological fractures, hypercalcaemia of malignancy, mediastinal compression, SVC obstruction.",[]],
+[6,"CP","Analyse: haemolytic anaemias (oxidative, AIHA), sickle cell disease, polycythaemia (primary and secondary), thrombocytosis (primary and secondary) — clinical features, causes, complications, investigations and management.",[["Life in the Fast Lane — Haemolytic anaemia","https://litfl.com/haemolytic-anaemia/"],["ASH — How I treat polycythaemia vera","https://ashpublications.org/blood/article/134/4/341/260695/How-I-treat-polycythemia-vera"]]],
+[6,"CP","Compare and contrast acute versus chronic leukaemias: clinical features, investigation, classification, staging and management.",[["American College of Pathologists — Initial Diagnostic Workup of Acute Leukemia","https://documents.cap.org/documents/acute-leukemia-pocket-guide.pdf"],["ASH Blood — How I treat chronic myelogenous leukaemia","https://ashpublications.org/blood/article/139/21/3138/476939/How-I-treat-chronic-phase-chronic-myelogenous"]]],
+[6,"CP","Analyse lymphoma and multiple myeloma: clinical features, classification, investigation, staging and management principles.",[["Aust J Gen Pract 2018 — Multiple myeloma: updated approach to management","https://www.ajgp.com.au"]]],
+[6,"CP","Evaluate causes of elevated ferritin and pancytopenia; formulate investigation plan to determine underlying aetiology.",[["Australian Red Cross Blood Service 2019 — High Ferritin App","https://highferritin.transfusion.com.au/education"],["RACGP AFP 2012 — Elevated serum ferritin: what should GPs know?","https://www.racgp.org.au/afp/2012/december/elevated-serum-ferritin"]]],
+[6,"SS","Outline investigation of symptoms and signs raising suspicion of cancer: red flag symptoms (haemoptysis, hoarse voice, change in bowel habit, blood in stool, unexplained anaemia, breast lump, dysphagia); describe current recommendations for lung cancer screening.",[["Iversen Scheel, SJPHC 2015 — Investigating symptoms of possible cancer","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4750720/pdf/ipri-33-170.pdf"]]],
+[6,"SS","Recognise patients requiring cancer genetics assessment; understand who needs referral for genetic counselling.",[["NSW eviQ 2017 — GP referral guidelines for cancer genetics assessment","https://www.eviq.org.au/cancer-genetics/referral-guidelines/1147-general-practitioner-referral-guidelines-for"]]],
+[6,"SS","Compare and contrast mechanism of action and common side effect profiles of traditional chemotherapy and immunotherapy.",[]],
+[6,"SS","Differentiate causes of lymphadenopathy: characteristics of lymph nodes on examination; list causes of generalised, cervical, supraclavicular, axillary and inguinal lymphadenopathy; outline appropriate investigations.",[]],
+[6,"SS","Compare causes of combined hepatosplenomegaly with isolated hepatomegaly and splenomegaly.",[]],
+[6,"SS","Outline initial investigations of acute leukaemia.",[["American College of Pathologists — Initial Diagnostic Workup of Acute Leukemia","https://documents.cap.org/documents/acute-leukemia-pocket-guide.pdf"]]],
+[6,"HSE","Outline causes for unwarranted clinical variation in cancer survival across Australia; identify factors that could address 'Closing the Gap'.",[["Page, Internal Medicine Journal 2016 — Clinical variation in cancer survival across Australia","https://onlinelibrary-wiley-com.ezproxy.newcastle.edu.au/doi/pdf/10.1111/imj.12948"]]],
+[6,"HSE","Review current cancer screening programs in Australia.",[["Dept of Health — Screening for cancer","https://www.health.gov.au/topics/cancer/screening"]]],
+[6,"HSE","Justify management plan for vaccination and prophylactic antibiotics in a patient who has undergone splenectomy.",[["Looke, MJA 2012 — Splenectomy and sepsis","https://www.mja.com.au/journal/2012/196/9/splenectomy-and-sepsis"]]],
+[6,"PD","Formulate a strategy to support shared decision-making in cancer care or non-malignant medical conditions; reflect on own practice.",[["Hoffmann, MJA 2014 — Shared decision-making: what do clinicians need to know?","https://www.mja.com.au/journal/2014/201/1/shared-decision-making-what-do-clinicians-need-know-and-why-should-they-bother"]]]
+];
+
+const COMPLEXITY=[3,3,3,2,2,3,2,3,1,1,1,2,2,1,1,2,1,1,2,2,1,1,3,2,2,3,3,2,3,2,2,3,2,2,1,2,1,1,1,1,2,2,2,2,3,2,2,3,3,3,3,3,2,2,2,2,1,1,2,1,1,1,1,1,1,2,1,1,3,3,3,3,2,2,1,2,1,1,1,1,1,2,2,1,1,3,2,2,2,1,2,2,2,2,2,1,1,2,2,1,1,1,2,1,3,2,3,3,3,3,3,2,2,1,2,2,1,1,2,1,2,2];
+const ALL_LPS=RAW.map((r,i)=>({id:i,topic:r[0],col:r[1],text:r[2],links:r[3]||[],complexity:COMPLEXITY[i]||2}));
+
+// Additional readings: [topic, title, url]
+const ADDITIONAL=[
+  [1,"Ling, Medicine Today 2015 — Justify rationalising investigations for palpitations","https://medicinetoday.com.au/sites/default/files/cpd/MT2015-10-043-LING.pdf"],
+  [2,"GESA — Patient information resources (examples of health literacy communication)","https://www.gesa.org.au/education/patient-resources/"],
+  [2,"UpToDate — Glomerular disease: evaluation and differential diagnosis in adults","https://www.uptodate.com.acs.hcn.com.au/contents/image?imageKey=NEPH%2F113287"],
+  [2,"NPS Medicinewise, Australian Prescriber 2007 — Prescribing in renal disease","https://www.nps.org.au/australian-prescriber/articles/prescribing-in-renal-disease"],
+  [3,"NICE Epilepsy overview 2019 — Pharmacological agents to terminate and prevent seizures","https://pathways.nice.org.uk/pathways/epilepsy"],
+  [3,"Australian Family Physician 2003 — Fatigue as a presenting symptom of endocrine disease","https://www.racgp.org.au/getattachment/feb1699f-8738-46d9-9c2c-c7af23e0eb85/attachment.aspx"],
+  [3,"Ng Tang Fui, Australian Family Physician 2014 — Assessment and management of androgen deficiency","https://www.racgp.org.au/afp/2014/may/male-androgen-disorders/"],
+  [3,"Lee, Australian Family Physician 2012 — Thyroid scans: indications for Technetium pertechnetate and ultrasound","https://www.racgp.org.au/afp/2012/august/thyroid-scans/"],
+  [3,"MDCalc — Serum osmolality / osmolarity calculator","https://www.mdcalc.com/serum-osmolality-osmolarity"],
+  [4,"UpToDate — Undifferentiated systemic rheumatic diseases and overlap syndromes","https://www.uptodate.com.acs.hcn.com.au/contents/image?imageKey=RHEUM%2F55672"],
+  [4,"Agency for Clinical Innovation 2013 — Preventative strategies for delirium","https://aci.health.nsw.gov.au/__data/assets/pdf_file/0003/181623/Delirium-Prevention.pdf"],
+  [4,"Queensland Health — Sad News, Sorry Business: Guidelines for caring for Aboriginal and Torres Strait Islander people through death and dying","https://www.health.qld.gov.au/__data/assets/pdf_file/0023/151736/sorry_business.pdf"],
+  [5,"Australian Family Physician 2012 — Case report: skin lesion and fever of unknown origin","https://www.racgp.org.au/afp/2012/januaryfebruary/a-skin-lesion-and-fever-of-unknown-origin/"],
+  [5,"RACGP — Managing pandemic influenza in general practice","https://www.racgp.org.au/running-a-practice/practice-management/managing-emergencies-and-pandemics/managing-pandemics/managing-pandemic-influenza-in-general-practic-1"],
+  [5,"ASHM — HIV management in Australasia 2016","http://hivmanagement.ashm.org.au/"],
+  [5,"Australian STI Management Guidelines","https://sti.guidelines.org.au/sexually-transmissible-infections/hiv/"],
+  [5,"Grillo, Australian Family Physician 2012 — Skin rash associated with limb weakness","https://www.racgp.org.au/afp/2012/october/skin-rash-associated-with-limb-weakness/"],
+  [5,"Guidelines for the Diagnosis, Management and Prevention of Leprosy 2023","https://www.who.int/publications/i/item/9789290227076"],
+  [6,"Dept of Health — Current cancer screening programs in Australia","https://www.health.gov.au/topics/cancer/screening"],
+  [6,"Morton, Australian Family Physician 2013 — Case: weight loss and lymphadenopathy","https://www.racgp.org.au/afp/2013/august/weight-loss-and-lymphadenopathy/"]
+];
+const ds=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const pd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
+const diffDays=(a,b)=>Math.round((b-a)/86400000);
+const fmt=d=>pd(d).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+const fmtLong=d=>pd(d).toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+// Night owl offset: if current hour < threshold, treat as previous calendar day
+let _dateOverride=null; // for testing only
+function dsNow(){
+  const threshold=state?.nightOwlHours||0;
+  if(_dateOverride) return _dateOverride;
+  const now=new Date();
+  return threshold>0&&now.getHours()<threshold?ds(addDays(now,-1)):ds(now);
+}
+const save=s=>{try{localStorage.setItem('jmp2026_v3',JSON.stringify(s));}catch(e){}};
+const load=()=>{try{const r=localStorage.getItem('jmp2026_v3');return r?JSON.parse(r):null;}catch(e){return null;}};
+
+let state=null,activeTab='Dashboard',selTopics=new Set([1,2,3,4,5,6]);
+const openNotes=new Set(); // track which LP note dropdowns are open
+const pendingSnoozed=new Set(); // LP ids flagged for snooze, applied on mark done
+
+const getMastery=id=>(state.mastery&&state.mastery[id])||0;
+function setMastery(id,val){if(!state.mastery)state.mastery={};state.mastery[id]=val;save(state);}
+const doneLPs=()=>{
+  const fromDays=state.days.filter(d=>d.completed).flatMap(d=>d.lps);
+  const excluded=(state.excludedIds||[]).map(id=>state.allLPs.find(l=>l.id===id)).filter(Boolean);
+  const seen=new Set(fromDays.map(l=>l.id));
+  return [...fromDays,...excluded.filter(l=>!seen.has(l.id))];
+};
+function masteryOf(lps){const c={1:0,2:0,3:0};lps.forEach(l=>{const m=getMastery(l.id);if(m>0)c[m]++;});return c;}
+function getToday(){return state&&state.days.find(d=>d.date===dsNow());}
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function distributeByComplexity(lps, numDays){
+  const bins=Array.from({length:numDays},()=>[]);
+  const totals=new Array(numDays).fill(0);
+  for(const lp of lps){
+    let minIdx=0;
+    for(let i=1;i<numDays;i++) if(totals[i]<totals[minIdx]) minIdx=i;
+    bins[minIdx].push(lp);
+    totals[minIdx]+=(lp.complexity||2);
+  }
+  return bins;
+}
+
+function buildSched(lps,s0,dl,buf,order,complexityMode){
+  if(order==='sequential'){
+    lps=[...lps].sort((a,b)=>a.topic-b.topic||a.id-b.id);
+  } else if(Array.isArray(order)){
+    const topicPos={};order.forEach((t,i)=>topicPos[t]=i);
+    lps=[...lps].sort((a,b)=>(topicPos[a.topic]??99)-(topicPos[b.topic]??99)||a.id-b.id);
+  } else {
+    lps=shuffle(lps);
+  }
+  const s=pd(s0),d=pd(dl),te=addDays(d,-buf-1);
+  const days=Math.max(1,diffDays(s,te)+1);
+  const out=[];
+  if(complexityMode){
+    const bins=distributeByComplexity(lps,days);
+    for(let i=0;i<days;i++)
+      out.push({date:ds(addDays(s,i)),lps:bins[i],completed:false,skipped:false});
+  } else {
+    const base=Math.floor(lps.length/days);
+    const extra=lps.length%days;
+    let idx=0;
+    for(let i=0;i<days;i++){
+      const count=base+(i<extra?1:0);
+      out.push({date:ds(addDays(s,i)),lps:lps.slice(idx,idx+count),completed:false,skipped:false});
+      idx+=count;
+    }
+  }
+  let cur=addDays(te,1);while(ds(cur)<dl){out.push({date:ds(cur),lps:[],completed:false,skipped:false,isBuffer:true});cur=addDays(cur,1);}
+  return out.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function applyDayChange(){
+  const today=dsNow();
+  state.todayCompletedDates=[];
+  state.todayCompletedDatesDay=today;
+  // Pre-populate with any already-completed non-calendarStudy days from today onwards
+  state.days.filter(d=>d.completed&&!d.calendarStudy&&d.date>=today).forEach(d=>{
+    if(!state.todayCompletedDates.includes(d.date)) state.todayCompletedDates.push(d.date);
+  });
+  const missed=state.days.filter(d=>d.date<today&&!d.completed&&!d.skipped&&!d.isBuffer&&!d.isProtected&&d.lps.length>0);
+  if(missed.length){
+    missed.forEach(d=>{d.skipped=true;});
+    recalc(state);
+    state.missedNotice={dates:missed.map(d=>fmt(d.date)),lpCount:missed.reduce((s,d)=>s+d.lps.length,0)};
+  } else {
+    recalc(state);
+  }
+  save(state);
+}
+
+function recalc(st){
+  const today=dsNow(),dl=pd(st.deadline),te=addDays(dl,-st.bufferDays-1);
+  // Sweep stale snoozes: any record whose returnDate has passed releases the LP
+  // back into the rotation. Without this, snoozed LPs whose landing day was
+  // wiped by a prior recalc end up "ghosted" — accounted for in state.snoozed
+  // but absent from every day's lps array.
+  if(st.snoozed){
+    Object.keys(st.snoozed).forEach(id=>{
+      const s=st.snoozed[id];
+      const rd=typeof s==='string'?s:s.returnDate;
+      if(rd<=today) delete st.snoozed[id];
+    });
+  }
+  const doneIds=new Set([
+    ...st.days.filter(d=>d.completed).flatMap(d=>d.lps.map(l=>l.id)),
+    ...(st.excludedIds||[])
+  ]);
+  const snoozedIds=new Set(Object.keys(st.snoozed||{}).map(Number));
+  let pending=st.allLPs.filter(l=>!doneIds.has(l.id)&&!snoozedIds.has(l.id));
+  // Sort pending by the stored LP order
+  const ord=st.lpOrder||'random';
+  if(ord==='sequential'){
+    pending=[...pending].sort((a,b)=>a.topic-b.topic||a.id-b.id);
+  } else if(Array.isArray(ord)){
+    const pos={};ord.forEach((t,i)=>pos[t]=i);
+    pending=[...pending].sort((a,b)=>(pos[a.topic]??99)-(pos[b.topic]??99)||a.id-b.id);
+  }
+  // random: preserve existing order (already distributed)
+  const completedDates=new Set(st.days.filter(d=>d.completed).map(d=>d.date));
+  const protectedDates=new Set(st.days.filter(d=>d.isProtected).map(d=>d.date));
+  const skippedDates=new Set(st.days.filter(d=>d.skipped).map(d=>d.date)); // all skipped, past and today
+  const skippedPastDates=new Set(st.days.filter(d=>d.skipped&&d.date<=today).map(d=>d.date));
+  const fd=[];
+  let c=pd(today);
+  while(ds(c)<=ds(te)){
+    const dateStr=ds(c);
+    if(!protectedDates.has(dateStr)&&!completedDates.has(dateStr)&&!skippedDates.has(dateStr)) fd.push(dateStr);
+    c=addDays(c,1);
+  }
+  const nf=[];
+  if(st.complexityMode&&fd.length>0){
+    const bins=distributeByComplexity(pending,fd.length);
+    for(let i=0;i<fd.length;i++)
+      nf.push({date:fd[i],lps:bins[i],completed:false,skipped:false});
+  } else {
+    const base=Math.floor(pending.length/Math.max(1,fd.length));
+    const extra=pending.length%Math.max(1,fd.length);
+    let idx=0;
+    for(let i=0;i<fd.length;i++){
+      const count=base+(i<extra?1:0);
+      nf.push({date:fd[i],lps:pending.slice(idx,idx+count),completed:false,skipped:false});
+      idx+=count;
+    }
+  }
+  const skippedDays=st.days
+    .filter(d=>d.skipped&&!d.completed&&d.date<=today)
+    .map(d=>({...d,lps:[]}));
+  const skippedDayDates=new Set(skippedDays.map(d=>d.date));
+  const buf=[];let c2=addDays(te,1);while(ds(c2)<st.deadline){buf.push({date:ds(c2),lps:[],completed:false,skipped:false,isBuffer:true});c2=addDays(c2,1);}
+  st.days=[
+    ...st.days.filter(d=>d.completed||d.isProtected),
+    ...skippedDays,
+    ...nf.filter(d=>!skippedDayDates.has(d.date)),
+    ...buf
+  ].sort((a,b)=>a.date.localeCompare(b.date));
+  lpIntegrityCheck(st);
+}
+
+function lpIntegrityCheck(st){
+  // Every LP in allLPs must be accounted for in exactly one of:
+  // completed days, snoozed, scheduled days, excludedIds
+  const accounted=new Set();
+
+  // Completed days
+  st.days.filter(d=>d.completed).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+  // Scheduled/pending days
+  st.days.filter(d=>!d.completed&&!d.isBuffer).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+  // Snoozed
+  Object.keys(st.snoozed||{}).map(Number).forEach(id=>accounted.add(id));
+  // Excluded
+  (st.excludedIds||[]).forEach(id=>accounted.add(id));
+
+  const missing=st.allLPs.filter(l=>!accounted.has(l.id));
+  if(!missing.length) return;
+
+  console.warn('LP integrity: '+missing.length+' missing LPs — re-injecting',missing.map(l=>l.id));
+
+  // Find the first available future non-completed non-buffer day to inject into
+  const today=dsNow();
+  const injectDay=st.days.find(d=>d.date>=today&&!d.completed&&!d.isBuffer&&!d.isProtected);
+  if(injectDay){
+    missing.forEach(lp=>{
+      if(!injectDay.lps.find(l=>l.id===lp.id)) injectDay.lps.push(lp);
+    });
+  } else {
+    // No suitable day — create one the day after the last study day
+    const lastDay=st.days.filter(d=>!d.isBuffer).slice(-1)[0];
+    const newDate=lastDay?ds(addDays(pd(lastDay.date),1)):today;
+    st.days.push({date:newDate,lps:missing,completed:false,skipped:false});
+    st.days.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+}
+
+function render(){
+  const app=document.getElementById('app');
+  if(!state){app.innerHTML=renderSetup();upPrev();initDragDrop();return;}
+  const tabs=['Dashboard','Study','Calendar','Progress','History','Notes','Settings'];
+  const modal=state.viewingDay?renderViewModal():state.pendingResolve?renderResolvePopup():'';
+  app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${state.allLPs.length} learning points</div></div>
+  <div class="tabs">${tabs.map(t=>`<button class="tab${activeTab===t?' active':''}" onclick="sw('${t}')">${t}</button>`).join('')}</div>
+  <div id="tc">${renderTab()}</div>`;
+}
+
+let masterySnapshot=null;
+
+function sw(t){
+  // Only restore/clear an abandoned ahead session when navigating AWAY from Study
+  // and only if it's NOT a calendar session (calendar sessions persist across tab switches)
+  if(t!=='Study'&&state&&state.aheadDate&&masterySnapshot&&!state.calendarSessionDate){
+    const aheadDay=state.days.find(d=>d.date===state.aheadDate);
+    if(aheadDay&&!aheadDay.completed){
+      aheadDay.lps.forEach(lp=>{
+        if(masterySnapshot[lp.id]!==undefined) state.mastery[lp.id]=masterySnapshot[lp.id];
+        else delete state.mastery[lp.id];
+      });
+      state.aheadDate=null;
+      masterySnapshot=null;
+      save(state);
+    }
+  }
+  // For calendar sessions, just clear aheadDate so it shows as paused on dashboard
+  if(t!=='Study'&&state&&state.aheadDate&&state.calendarSessionDate){
+    const aheadDay=state.days.find(d=>d.date===state.aheadDate);
+    if(aheadDay&&!aheadDay.completed){
+      state.aheadDate=null;
+      save(state);
+    }
+  }
+  activeTab=t;render();
+}
+function rerender(){document.getElementById('tc').innerHTML=renderTab();restoreOpenNotes();}
+function renderTab(){
+  if(activeTab==='Dashboard')return renderDash();
+  if(activeTab==='Study')return renderToday();
+  if(activeTab==='Progress')return renderProgress();
+  if(activeTab==='History')return renderHistory();
+  if(activeTab==='Calendar')return renderCalendar();
+  if(activeTab==='Notes')return renderNotes();
+  if(activeTab==='Settings')return renderSettings();
+}
+
+function renderSetup(){
+  // Reset local setup state each time setup is rendered
+  lpComplexityMode=false;
+  lpExcluded.clear();
+  lpOwlHours=0;
+  const today=dsNow(),dead=ds(addDays(new Date(),42));
+
+  const tnames=['T1: Cardiovascular & Respiratory','T2: Gastroenterology & Renal','T3: Neurology, Endocrinology & Diabetes','T4: Rheumatology, Older Person\'s Health & Palliative Care','T5: Infectious Disease, Sexual Health & Dermatology','T6: Oncology & Haematology'];
+
+  const lpListHtml=tnames.map((tn,ti)=>{
+    const topicLps=ALL_LPS.filter(l=>l.topic===ti+1);
+    return`<div style="margin-bottom:12px">
+      <div onclick="toggleExcludeTopic(${ti+1},this)" data-topic="${ti+1}" style="font-size:11px;font-weight:500;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;cursor:pointer;padding:4px 6px;border-radius:4px;margin-left:-6px;user-select:none" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background=''">☐ ${tn}</div>
+      ${topicLps.map(lp=>`<label style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--gray-100);cursor:pointer;font-size:12px;color:var(--gray-700);line-height:1.45">
+        <input type="checkbox" data-lpid="${lp.id}" onchange="toggleExcludeLP(${lp.id},this.checked)" style="margin-top:2px;flex-shrink:0"/>
+        <span>${lp.text}</span>
+      </label>`).join('')}
+    </div>`;
+  }).join('');
+
+  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 19 Apr 2026</div></div>
+  <div class="card" style="background:var(--gray-50)">
+    <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
+    <div style="border-top:1px solid var(--gray-200);padding-top:12px">
+      <div style="font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:6px">Progress is saved automatically in your browser.</div>
+      <ul style="font-size:12px;color:var(--gray-500);line-height:1.8;margin:0;padding-left:16px">
+        <li>Use the same browser on the same device each time</li>
+        <li>Regularly export your progress via the Export button in Settings</li>
+        <li>Use Import to restore your save file on a new device</li>
+        <li>Avoid clearing browser data — this will wipe your progress. Export first if you need to.</li>
+        <li>Don't use incognito mode — progress won't be saved during that session.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Dates</div>
+    <div class="form-row"><label>Start date</label><input type="date" id="iS" value="${today}" oninput="upPrev()"/><div style="font-size:12px;color:var(--gray-400);margin-top:4px">The first day you'll begin studying.</div></div>
+    <div class="form-row"><label>Deadline</label><input type="date" id="iD" value="${dead}" oninput="upPrev()"/><div style="font-size:12px;color:var(--gray-400);margin-top:4px">Your exam or submission date. Learning points will be distributed up to this date.</div></div>
+    <div class="form-row"><label>Buffer days — finish this many days before the deadline</label><input type="number" id="iB" value="3" min="0" max="90" style="width:80px" oninput="upPrev()"/></div>
+    <div class="form-row"><label>Learning point order</label>
+      <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+        <button id="oRand" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='random'?'on':''}" onclick="setOrder('random',this)">🔀 Randomised</button>
+        <button id="oSeq" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='sequential'?'on':''}" onclick="setOrder('sequential',this)">1→6 Topic order</button>
+        <button id="oCust" class="chip ${Array.isArray(lpOrder)?'on':''}" onclick="setOrder('custom',this)">Custom order</button>
+      </div>
+      <div id="customTopicOrder" style="display:${Array.isArray(lpOrder)?'block':'none'};margin-top:10px">
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:6px">Drag to set your preferred topic order:</div>
+        <div id="topicDragList" style="display:flex;flex-direction:column;gap:4px">
+          ${lpTopicOrder.map(t=>`<div draggable="true" data-topic="${t}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;cursor:grab;font-size:12px;color:var(--gray-700);user-select:none">
+            <span style="color:var(--gray-300);font-size:14px">⠿</span>
+            <span style="font-size:10px;font-weight:600;color:var(--gray-400);min-width:16px">T${t}</span>
+            <span>${TNAMES[t-1]}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="form-row"><label>Complexity-weighted scheduling</label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray-600);margin-top:4px">
+        <input type="checkbox" id="iCmx" onchange="lpComplexityMode=this.checked"/>
+        Distribute LPs by complexity score rather than equal count
+      </label>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:6px;line-height:1.6">Enabling this distributes learning points based on AI-assigned complexity scores, so each day has a similar cognitive load rather than just an equal number of points.</div>
+    </div>
+    <div class="form-row"><label>New day starts after</label>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+        <input type="number" id="iOwl" value="0" min="0" max="6" style="width:60px" oninput="updSetupOwl(this.value)"/>
+        <span style="font-size:13px;color:var(--gray-500)" id="iOwlDesc">midnight (default)</span>
+      </div>
+      <div style="font-size:12px;color:var(--gray-400);margin-top:5px">Set to the latest time you think you'll be studying. If you study past midnight, today's session won't roll over until then.</div>
+    </div>
+    <div id="pv"></div></div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="document.getElementById('excBody').style.display=document.getElementById('excBody').style.display==='none'?'block':'none';this.querySelector('.excArrow').textContent=document.getElementById('excBody').style.display==='none'?'▸':'▾'">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="card-title" style="margin:0">Exclude learning points</div>
+        <span id="excCount" style="font-size:12px;color:var(--amber-dark);display:none">0 excluded</span>
+      </div>
+      <span class="excArrow" style="color:var(--gray-400);font-size:12px">▸</span>
+    </div>
+    <div id="excBody" style="display:none;margin-top:12px">
+      <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Tick any LPs you have already studied or wish to skip. They will be marked as completed and not included in the schedule.</div>
+      <div style="margin-bottom:8px;display:flex;gap:6px">
+        <input type="text" id="lpSearch" placeholder="Search learning points…" oninput="filterSetupLPs(this.value)" style="flex:1;font-size:12px"/>
+        <button class="btn sm" onclick="document.querySelectorAll('[data-lpid]').forEach(cb=>{cb.checked=false;lpExcluded.delete(parseInt(cb.dataset.lpid))});document.querySelectorAll('[data-topic]').forEach(h=>h.textContent=h.textContent.replace('☑','☐'));updExcCount();upPrev()">Clear all</button>
+      </div>
+      <div id="lpExcludeList" style="max-height:300px;overflow-y:auto;border:1px solid var(--gray-100);border-radius:var(--radius-sm);padding:8px 10px">
+        ${lpListHtml}
+      </div>
+    </div>
+  </div>
+  <div id="se" style="display:none" class="alert danger"></div>
+  <button class="btn primary full" onclick="startPlan()">Create my study plan</button>
+  <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--gray-400)">Already have a progress file? <label style="color:var(--blue);cursor:pointer;text-decoration:underline">Import it<input type="file" accept=".json" onchange="importProgress(this)" style="display:none"/></label></div>`;
+}
+
+let lpOrder='random';
+let lpComplexityMode=false;
+let lpOwlHours=0;
+let lpTopicOrder=[1,2,3,4,5,6];
+const lpExcluded=new Set();
+
+function updSetupOwl(v){
+  lpOwlHours=Math.min(6,Math.max(0,parseInt(v)||0));
+  const desc=document.getElementById('iOwlDesc');
+  if(desc) desc.textContent=lpOwlHours===0?'midnight (default)':`${lpOwlHours}:00 AM`;
+}
+
+function setOrder(o,el){
+  lpOrder=o==='custom'?lpTopicOrder:o;
+  document.querySelectorAll('#oRand,#oSeq,#oCust').forEach(b=>b&&b.classList.remove('on'));
+  el.classList.add('on');
+  const customList=document.getElementById('customTopicOrder');
+  if(customList) customList.style.display=o==='custom'?'block':'none';
+}
+
+function initDragDrop(){
+  const list=document.getElementById('topicDragList');
+  if(!list) return;
+  let dragging=null;
+  list.querySelectorAll('[draggable]').forEach(item=>{
+    item.addEventListener('dragstart',e=>{dragging=item;item.style.opacity='.4';});
+    item.addEventListener('dragend',e=>{dragging=null;item.style.opacity='1';});
+    item.addEventListener('dragover',e=>{
+      e.preventDefault();
+      const after=getDragAfter(list,e.clientY);
+      if(after==null) list.appendChild(dragging);
+      else list.insertBefore(dragging,after);
+    });
+  });
+  function getDragAfter(container,y){
+    const els=[...container.querySelectorAll('[draggable]:not([style*="opacity: 0.4"])')];
+    return els.reduce((closest,child)=>{
+      const box=child.getBoundingClientRect();
+      const offset=y-box.top-box.height/2;
+      return offset<0&&offset>(closest.offset||(-Infinity))?{offset,element:child}:closest;
+    },{}).element||null;
+  }
+  // Update lpTopicOrder and lpOrder on any drop
+  list.addEventListener('dragend',()=>{
+    lpTopicOrder=[...list.querySelectorAll('[draggable]')].map(el=>parseInt(el.dataset.topic));
+    lpOrder=lpTopicOrder;
+  });
+}
+
+function toggleExcludeLP(id,checked){
+  if(checked) lpExcluded.add(id); else lpExcluded.delete(id);
+  updExcCount();
+  upPrev();
+}
+
+function updExcCount(){
+  const el=document.getElementById('excCount');
+  if(!el) return;
+  if(lpExcluded.size>0){el.textContent=lpExcluded.size+' excluded';el.style.display='';}
+  else el.style.display='none';
+}
+
+function toggleExcludeTopic(topic,el){
+  const topicLpIds=new Set(ALL_LPS.filter(l=>l.topic===topic).map(l=>l.id));
+  const allChecked=[...topicLpIds].every(id=>lpExcluded.has(id));
+  document.querySelectorAll('[data-lpid]').forEach(cb=>{
+    const id=parseInt(cb.dataset.lpid);
+    if(!topicLpIds.has(id)) return;
+    cb.checked=!allChecked;
+    if(!allChecked) lpExcluded.add(id); else lpExcluded.delete(id);
+  });
+  el.textContent=el.textContent.replace(allChecked?'☑':'☐', allChecked?'☐':'☑');
+  updExcCount();upPrev();
+}
+
+function filterSetupLPs(q){
+  const lc=q.toLowerCase();
+  document.querySelectorAll('[data-lpid]').forEach(cb=>{
+    const row=cb.closest('label');
+    if(!row) return;
+    row.style.display=!q||row.textContent.toLowerCase().includes(lc)?'':'none';
+  });
+}
+
+function togT(t,el){if(selTopics.has(t)){selTopics.delete(t);el.classList.remove('on');}else{selTopics.add(t);el.classList.add('on');}upPrev();}
+
+function upPrev(){
+  const s=document.getElementById('iS')?.value,d=document.getElementById('iD')?.value,b=parseInt(document.getElementById('iB')?.value)||0;
+  const lps=ALL_LPS.filter(l=>selTopics.has(l.topic)&&!lpExcluded.has(l.id)),box=document.getElementById('pv');if(!box)return;
+  if(s&&d){const days=Math.max(1,diffDays(pd(s),addDays(pd(d),-b-1)));box.innerHTML=`<div class="preview">${lps.length} points · ${days} study days · ~${Math.ceil(lps.length/days)} per day · ${b} buffer day${b!==1?'s':''}${lpExcluded.size>0?` · <span style="color:var(--amber-dark)">${lpExcluded.size} excluded</span>`:''}</div>`;}
+  else box.innerHTML=`<div class="preview">${lps.length} learning points selected</div>`;
+}
+
+function startPlan(){
+  const s=document.getElementById('iS').value,d=document.getElementById('iD').value,b=parseInt(document.getElementById('iB').value)||0,e=document.getElementById('se');
+  e.style.display='none';
+  if(!s||!d){e.textContent='Please set both dates.';e.style.display='';return;}
+  if(pd(s)>=pd(d)){e.textContent='Start date must be before deadline.';e.style.display='';return;}
+  const allTopicLps=ALL_LPS.filter(l=>selTopics.has(l.topic));
+  if(!allTopicLps.length){e.textContent='No topics selected.';e.style.display='';return;}
+  const lps=allTopicLps.filter(l=>!lpExcluded.has(l.id));
+  if(!lps.length){e.textContent='All learning points excluded — please include at least one.';e.style.display='';return;}
+  // Build schedule with non-excluded LPs
+  const sched=buildSched(lps,s,d,b,lpOrder,lpComplexityMode);
+  const mastery={};
+  if(lpExcluded.size>0){
+    const excludedLps=allTopicLps.filter(l=>lpExcluded.has(l.id));
+    excludedLps.forEach(l=>mastery[l.id]=3);
+  }
+  state={startDate:s,deadline:d,bufferDays:b,lpOrder,complexityMode:lpComplexityMode,nightOwlHours:lpOwlHours,allLPs:allTopicLps,days:sched,mastery,snoozed:{},excludedIds:[...lpExcluded]};
+  lpIntegrityCheck(state);
+  activeTab='Dashboard';
+  save(state);render();
+  window.scrollTo(0,0);
+  showOnboarding();
+}
+
+function showOnboarding(){
+  const COLORS={
+    green:{bg:'#f0fdf4',border:'#bbf7d0',dot:'#16a34a',text:'#15803d'},
+    amber:{bg:'#fffbeb',border:'#fde68a',dot:'#d97706',text:'#b45309'},
+    red:  {bg:'#fef2f2',border:'#fecaca',dot:'#dc2626',text:'#b91c1c'},
+    blue: {bg:'#eff6ff',border:'#bfdbfe',dot:'#3b82f6',text:'#1d4ed8'},
+    purple:{bg:'#faf5ff',border:'#e9d5ff',dot:'#a855f7',text:'#7c3aed'},
+    gray: {bg:'#f9fafb',border:'#e5e7eb',dot:'#9ca3af',text:'#6b7280'},
+  };
+  const pill=(c,label)=>{const col=COLORS[c];return`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${col.bg};border-radius:6px;border:1px solid ${col.border}"><div style="width:8px;height:8px;border-radius:50%;background:${col.dot};flex-shrink:0"></div><span style="font-size:12px;color:${col.text}">${label}</span></div>`;};
+  const sep=()=>`<div style="width:100%;height:0.5px;background:#f3f4f6;margin:2px 0"></div>`;
+  const calRow=(inner,circleBg,circleBorder,dateLabel,desc,descColor)=>`<div style="display:flex;align-items:center;gap:10px;padding:5px 0"><div style="width:32px;height:32px;border-radius:50%;background:${circleBg};border:${circleBorder};display:flex;align-items:center;justify-content:center;flex-shrink:0">${inner}</div><div><div style="font-size:12px;font-weight:500;color:#111">${dateLabel}</div><div style="font-size:11px;color:${descColor||'#6b7280'}">${desc}</div></div></div>`;
+  const num=(n,col)=>`<span style="font-size:10px;font-weight:500;color:${col}">${n}</span>`;
+  const tick=`<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><polyline points="2,7 5,10 11,3" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const bufDash=`<span style="font-size:14px;font-weight:300;color:#16a34a;line-height:1">–</span>`;
+
+  const slides=[
+    {title:'Welcome to your study planner',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Your 122 learning points are spread across your study period. Each day you get a small set to work through — rate them, snooze anything you need to revisit, and mark the day done.</p><div style="display:flex;flex-direction:column;gap:6px">${pill('green','Confident — got it')}${pill('amber','Getting there — still learning')}${pill('red','Needs work — revisit soon')}</div>`},
+    {title:'Snooze to revisit later',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Not ready to rate a point yet? Snooze it — it returns in 3 days so you can review it again before rating.</p>${pill('amber','Snoozed — returning in 3 days')}<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:10px">Days with returning snoozed points show a small <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;vertical-align:middle"></span> amber dot on the Calendar.</p>`},
+    {title:'Study ahead for a day off',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Complete a future day's session early from the Dashboard or Calendar. You can then take that day as a protected day off — streak preserved, no points scheduled.</p><div style="display:flex;flex-direction:column;gap:6px">${pill('purple','Protected — earned day off')}<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f0fdf4;border-radius:6px;border:1.5px dashed #16a34a"><div style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0"></div><span style="font-size:12px;color:#15803d">Buffer — free days before deadline</span></div></div>`},
+    {title:'Your schedule on the Calendar',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">The Calendar tab shows your full schedule. Each circle shows how many points are due — tap any future day to preview and study it early.</p><div style="display:flex;flex-direction:column;gap:2px;border-top:0.5px solid #f3f4f6;padding-top:12px">${calRow(num('4','#1d4ed8'),'#eff6ff','2px solid #3b82f6','19 Apr','4 learning points due — today','#1d4ed8')}${sep()}${calRow(num('3','#6b7280'),'#f9fafb','1px solid #e5e7eb','20 Apr','3 learning points due','')}${sep()}${calRow(tick,'#faf5ff','2px solid #a855f7','21 Apr','Protected day — no points','#7c3aed')}${sep()}${calRow(num('3','#6b7280'),'#f9fafb','1px solid #e5e7eb','22 Apr','3 learning points due','')}${sep()}${calRow(bufDash,'#f0fdf4','1.5px dashed #16a34a','23 Apr','Buffer day — no points','#15803d')}</div>`},
+    {title:'Export your progress regularly',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:12px">Progress saves automatically in your browser, but it can be lost if you clear your cache or switch devices.</p><p style="font-size:13px;color:#6b7280;line-height:1.7">Go to <span style="font-weight:500;color:#111">Settings → Export progress</span> regularly. Use Import to restore on any device.</p>`},
+  ];
+
+  let idx=0;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px 64px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)';
+
+  const modal=document.createElement('div');
+  modal.style.cssText='background:#fff;border-radius:12px;width:100%;max-width:380px;overflow:hidden;font-family:inherit';
+
+  const close=()=>document.body.removeChild(overlay);
+
+  const renderSlide=()=>{
+    const s=slides[idx];
+    const dotsHtml=slides.map((_,i)=>`<div onclick="(function(){window._obIdx=${i};window._obRender();})()" style="width:7px;height:7px;border-radius:50%;background:${i===idx?'#1a1a1a':'#d1d5db'};cursor:pointer;flex-shrink:0"></div>`).join('');
+    const isLast=idx===slides.length-1;
+    modal.innerHTML=`
+      <div style="padding:20px 20px 16px">
+        <div style="font-size:11px;color:#9ca3af;margin-bottom:8px;letter-spacing:.04em">${idx+1} of ${slides.length}</div>
+        <div style="font-size:16px;font-weight:500;color:#111;margin-bottom:12px">${s.title}</div>
+        ${s.body}
+      </div>
+      <div style="padding:12px 20px 16px;border-top:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:7px;align-items:center">${dotsHtml}</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          ${!isLast?`<span onclick="window._obClose()" style="font-size:12px;color:#9ca3af;cursor:pointer;text-decoration:underline;text-underline-offset:2px">Skip</span>`:''}
+          <button onclick="window._obNext()" style="font-size:12px;padding:6px 16px;border-radius:20px;background:#1a1a1a;color:#fff;border:none;cursor:pointer;font-family:inherit">${isLast?'Done':'Next →'}</button>
+        </div>
+      </div>`;
+  };
+
+  window._obIdx=0;
+  window._obRender=()=>{idx=window._obIdx;renderSlide();};
+  window._obNext=()=>{if(idx<slides.length-1){window._obIdx=idx+1;window._obRender();}else close();};
+  window._obClose=()=>close();
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  renderSlide();
+}
+
+function getSnoozedIds(){
+  if(!state.snoozed) return new Set();
+  return new Set(Object.keys(state.snoozed).map(Number));
+}
+
+function segBar(total,lps,height){
+  if(!total)return`<div class="pbar-wrap" style="height:${height}px"></div>`;
+  const snoozedIds=getSnoozedIds();
+  const done=lps.length,m=masteryOf(lps);
+  const pct=Math.round(done/total*100);
+  const rated=m[1]+m[2]+m[3];
+  const snoozed=lps.filter(l=>snoozedIds.has(l.id)).length;
+  const unrated=done-rated-snoozed; // genuinely unrated (not snoozed)
+  const gp=done?Math.round(m[3]/done*100):0;
+  const ap=done?Math.round(m[2]/done*100):0;
+  const rp=done?Math.round(m[1]/done*100):0;
+  const up=done?Math.round(unrated/done*100):0;
+  const sp=done?Math.round(snoozed/done*100):0;
+  return`<div class="pbar-wrap" style="height:${height}px"><div style="width:${pct}%;height:100%;display:flex"><div class="seg-g" style="width:${gp}%"></div><div class="seg-a" style="width:${ap}%"></div><div class="seg-r" style="width:${rp}%"></div><div style="background:#9ca3af;width:${up}%"></div><div style="background:#fde68a;width:${sp}%"></div></div></div>`;
+}
+
+function renderDash(){
+  const total=state.allLPs.length,dl=doneLPs(),done=dl.length,pct=Math.round(done/total*100);
+  const daysLeft=Math.max(0,diffDays(pd(dsNow()),pd(state.deadline)));
+  const dayObj=getToday();
+
+  // Missed day notification
+  let missedBanner='';
+  if(state.missedNotice){
+    const{dates,lpCount}=state.missedNotice;
+    const dayWord=dates.length===1?'day':'days';
+    missedBanner=`<div class="alert warning" style="margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+      <div><strong>${dates.length} missed ${dayWord} (${dates.join(', ')})</strong><br>${lpCount} learning point${lpCount!==1?'s':''} redistributed across your remaining schedule.</div>
+      <span onclick="state.missedNotice=null;save(state);rerender()" style="font-size:18px;cursor:pointer;color:var(--amber-dark);flex-shrink:0;line-height:1">×</span>
+    </div>`;
+  }
+
+  const _excludedSet=new Set(state.excludedIds||[]);
+  const _snoozedIds=getSnoozedIds();
+  const topicRows=TNAMES.map((n,i)=>{
+    const t=i+1,tlps=state.allLPs.filter(l=>l.topic===t);if(!tlps.length)return'';
+    const tdl=[
+      ...state.days.filter(d=>d.completed).flatMap(d=>d.lps).filter(l=>l.topic===t),
+      ...state.allLPs.filter(l=>l.topic===t&&_excludedSet.has(l.id)),
+      ...state.allLPs.filter(l=>l.topic===t&&_snoozedIds.has(l.id)&&!_excludedSet.has(l.id)&&!state.days.filter(d=>d.completed).flatMap(d=>d.lps).find(cl=>cl.id===l.id))
+    ],m=masteryOf(tdl);
+    return`<div class="tp-row"><div class="tp-label"><span class="tp-name">${n}</span><div class="tp-counts"><span class="tp-g">${m[3]} ✓</span><span class="tp-a">${m[2]} ~</span><span class="tp-r">${m[1]} ✗</span><span class="tp-tot">${tdl.length}/${tlps.length}</span></div></div>${segBar(tlps.length,tdl,8)}</div>`;
+  }).join('');
+
+  const studyDays=state.days.filter(d=>!d.isBuffer);
+  const weekRows=[];
+  if(studyDays.length){
+    const wStart=pd(studyDays[0].date);
+    for(let w=0;w<20;w++){
+      const ws=addDays(wStart,w*7),we=addDays(ws,6);
+      const wdays=studyDays.filter(d=>d.date>=ds(ws)&&d.date<=ds(we));
+      if(!wdays.length)break;
+      const wlps=wdays.flatMap(d=>d.lps),wdone=wdays.filter(d=>d.completed).flatMap(d=>d.lps);
+      weekRows.push(`<div class="wk-row"><div class="wk-lbl">Week ${w+1}<br><span style="font-size:10px;color:var(--gray-400)">${fmt(ds(ws))}</span></div>${segBar(wlps.length,wdone,8)}<div class="wk-pct">${wdone.length}/${wlps.length}</div></div>`);
+    }
+  }
+
+  const today=dsNow();
+  let ctaHtml='';
+
+  // Helper to build a consistent box
+  const box=(onclick,accent,bg,labelColor,label,value,right,cursor='pointer',extra='')=>
+    `<div ${onclick?`onclick="${onclick}"`:''}style="display:flex;align-items:center;justify-content:space-between;background:${bg};border:1.5px solid ${accent};border-radius:var(--radius);padding:14px 18px;margin-bottom:8px;cursor:${cursor};transition:all .15s${extra}" ${onclick?`onmouseover="this.style.boxShadow='0 0 0 3px ${accent}40'" onmouseout="this.style.boxShadow=''"`:''}>
+      <div>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${labelColor};margin-bottom:4px">${label}</div>
+        <div style="font-size:15px;font-weight:500;color:${labelColor==='#1d4ed8'?'#1e40af':labelColor==='var(--green-dark)'?'var(--gray-900)':labelColor==='var(--gray-400)'?'var(--gray-600)':'var(--gray-900)'}">${value}</div>
+      </div>
+      ${right}
+    </div>`;
+
+  // Done boxes — only show today's completed session, and not if today is protected
+  // Green done boxes: any day completed today or via dashboard study-ahead, reset daily
+  // "completed today" means: completed on or before today, OR completed ahead via dashboard (not calendarStudy)
+  // We track this by storing completedOn date — but since we don't have that, use:
+  // - past/today completed non-calendarStudy days that were completed on today's date
+  // - We use state.todayCompletedDates (set on markDone/markAheadDone) for daily reset
+  const greenDones=state.days.filter(d=>d.completed&&!d.calendarStudy&&(state.todayCompletedDates||[]).includes(d.date)&&!(d.isProtected&&d.date===today)).sort((a,b)=>a.date.localeCompare(b.date));
+  greenDones.forEach(d=>{
+    const label=d.date===today?`Today · ${fmt(d.date)}`:fmt(d.date);
+    ctaHtml+=`<div class="dash-cta" style="cursor:default;margin-bottom:8px;border-color:var(--green-light)"><div><div class="dash-cta-lbl" style="color:var(--green-dark)">${label}</div><div class="dash-cta-val">Done ✓</div></div><div style="display:flex;align-items:center;gap:10px"><span onclick="viewDay('${d.date}')" style="font-size:12px;color:var(--gray-400);cursor:pointer;text-decoration:underline;text-underline-offset:2px">view</span><span class="badge bg">Done</span></div></div>`;
+  });
+
+  // Blue done boxes: calendar-initiated sessions, shown after completion, reset daily
+  const blueDones=state.days.filter(d=>d.completed&&d.calendarStudy&&(state.todayCompletedDates||[]).includes(d.date)).sort((a,b)=>a.date.localeCompare(b.date));
+  blueDones.forEach(d=>{
+    ctaHtml+=box('','#bfdbfe','#eff6ff','#1d4ed8',`📅 ${fmt(d.date)}`,'Done ✓ — planned ahead',
+      `<div style="display:flex;align-items:center;gap:10px"><span onclick="viewDay('${d.date}')" style="font-size:12px;color:#93c5fd;cursor:pointer;text-decoration:underline;text-underline-offset:2px" onmouseover="event.stopPropagation()" onmouseout="event.stopPropagation()">view</span><span style="font-size:10px;padding:3px 8px;border-radius:10px;font-weight:600;background:#dbeafe;color:#1d4ed8">Done</span></div>`,'default');
+  });
+
+  // Today's box
+  if(!dayObj||dayObj.isBuffer){
+    ctaHtml+=box(`sw('Study')`,'var(--gray-200)','#fff','var(--gray-400)','Today\'s session',
+      'No session scheduled',
+      `<span style="font-size:20px;color:var(--gray-300)">→</span>`);
+  } else if(dayObj.isProtected){
+    const viewLink=dayObj.lps&&dayObj.lps.length>0?`<span onclick="viewDay('${today}')" style="font-size:12px;color:#c4b5fd;cursor:pointer;text-decoration:underline;text-underline-offset:2px">view</span>`:'';
+    ctaHtml+=box('','#e9d5ff','#faf5ff','#7c3aed','Today\'s session',
+      '🎉 Protected day — enjoy the break!',
+      viewLink,'default');
+  } else if(dayObj.skipped){
+    ctaHtml+=box(`sw('Study')`,'#fde68a','#fffbeb','var(--amber-dark)','Today\'s session',
+      'Skipped — load redistributed',`<span style="font-size:20px;color:var(--amber)">→</span>`);
+  } else if(!dayObj.completed){
+    ctaHtml+=box(`sw('Study')`,'var(--green)','#fff','var(--green-dark)','Today\'s session',
+      `${activeLpCount(dayObj)} learning point${activeLpCount(dayObj)!==1?'s':''} to cover`,
+      `<span style="font-size:20px;color:var(--green)">→</span>`,'pointer',';animation:pulse-border 2.5s ease-in-out infinite');
+  }
+
+  // Active specific-date session (aheadDate set right now)
+  if(state.aheadDate){
+    const ad=state.days.find(d=>d.date===state.aheadDate);
+    if(ad&&!ad.completed){
+      ctaHtml+=box(`sw('Study')`,'#bfdbfe','#eff6ff','#1d4ed8','📅 Session in progress',
+        `${fmt(ad.date)} · ${ad.lps.length} point${ad.lps.length!==1?'s':''}`,
+        `<span style="font-size:20px;color:#3b82f6">→</span>`);
+    }
+  }
+
+  // Dashed study-ahead boxes — when today is done or protected (or no session at all)
+  const todayIsDoneOrProtected=(dayObj&&dayObj.completed)||(dayObj&&dayObj.isProtected)||(!dayObj);
+  if(todayIsDoneOrProtected){
+    const nextStudy=state.days.find(d=>d.date>today&&!d.isBuffer&&!d.isProtected&&!d.completed&&!d.skipped&&d.lps.length>0&&d.date!==state.aheadDate);
+    if(nextStudy){
+      const returning=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===nextStudy.date;}).length;
+      const pts=activeLpCount(nextStudy)+returning;
+      ctaHtml+=box(`startStudyAhead('${nextStudy.date}')`,'var(--gray-300)','#fff','var(--gray-400)',
+        'Study ahead — optional',`${fmt(nextStudy.date)} · ${pts} point${pts!==1?'s':''}`,
+        `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span style="font-size:20px;color:var(--gray-300)">→</span><span onclick="event.stopPropagation();sw('Calendar')" onmouseover="this.style.color='var(--gray-700)';this.style.background='var(--gray-100)';event.stopPropagation()" onmouseout="this.style.color='var(--gray-400)';this.style.background='transparent'" style="font-size:11px;color:var(--gray-400);text-decoration:underline;cursor:pointer;white-space:nowrap;padding:2px 6px;border-radius:4px;transition:all .15s">Choose a specific date</span></div>`,'pointer',';border-style:dashed');
+    }
+  }
+
+  // Persistent calendar session (paused — tab switched away)
+  if(!state.aheadDate&&state.calendarSessionDate){
+    const csd=state.days.find(d=>d.date===state.calendarSessionDate);
+    if(csd&&!csd.completed){
+      ctaHtml+=box(`resumeCalendarSession()`,'#bfdbfe','#eff6ff','#1d4ed8','📅 Session paused',
+        `${fmt(csd.date)} · ${csd.lps.length} point${csd.lps.length!==1?'s':''} — tap to resume`,
+        `<span style="font-size:20px;color:#3b82f6">→</span>`);
+    } else {
+      state.calendarSessionDate=null;save(state);
+    }
+  }
+
+  // Streak — consecutive days studied (completed or protected), going back from today
+  const today2=dsNow();
+  let streak=0;
+  let check=pd(today2);
+  // Include today if completed or protected
+  while(true){
+    const checkStr=ds(check);
+    const d2=state.days.find(d=>d.date===checkStr);
+    if(d2&&(d2.completed||d2.isProtected)){
+      streak++;
+      check=addDays(check,-1);
+    } else {
+      break;
+    }
+  }
+
+  // Flame SVG — grows at milestones 3, 6, 10, 15, 30
+  function flameSvg(streak){
+    const colors=streak===0
+      ?{outer:'#d1d5db',inner:'#e5e7eb',core:'#f3f4f6'}
+      :streak>=30
+      ?{outer:'#93c5fd',inner:'#dbeafe',core:'#eff6ff'}
+      :streak>=20
+      ?{outer:'#f0abfc',inner:'#fae8ff',core:'#fdf4ff'}
+      :streak>=15
+      ?{outer:'#7c3aed',inner:'#a78bfa',core:'#ede9fe'}
+      :streak>=10
+      ?{outer:'#dc2626',inner:'#f87171',core:'#fecaca'}
+      :streak>=6
+      ?{outer:'#ea580c',inner:'#fb923c',core:'#fed7aa'}
+      :streak>=3
+      ?{outer:'#d97706',inner:'#fbbf24',core:'#fef3c7'}
+      :{outer:'#f59e0b',inner:'#fcd34d',core:'#fffbeb'};
+    const scale=streak>=30?1.15:streak>=20?1.12:streak>=15?1.1:streak>=10?1.05:streak>=6?1.0:streak>=3?.95:.88;
+    const o=colors.outer,i=colors.inner,c=colors.core;
+    const body=`
+      <path d="M20 2 C20 2 30 10 32 20 C34 28 30 34 28 36 C26 30 24 26 20 24 C22 20 22 14 18 10 C16 16 16 22 14 26 C10 30 8 34 8 38 C8 44 13 48 20 48 C27 48 34 44 34 38 C34 28 28 18 20 2Z" fill="${o}"/>
+      <path d="M20 16 C20 16 26 22 27 28 C28 33 25 37 23 39 C22 35 21 32 18 30 C19 27 19 23 17 20 C15 24 15 28 13 31 C11 34 11 38 11 40 C11 44 15 47 20 47 C25 47 29 44 29 40 C29 33 24 24 20 16Z" fill="${i}"/>
+      <path d="M20 30 C20 30 23 33 23 37 C23 40 21 42 20 43 C19 42 17 40 17 37 C17 33 20 30 20 30Z" fill="${c}"/>`;
+    const svg=streak>=30
+      ?`<ellipse cx="7" cy="14" rx="3" ry="4.5" fill="${o}" opacity="0.8"/>
+        <ellipse cx="33" cy="10" rx="2.5" ry="3.5" fill="${i}" opacity="0.9"/>
+        <circle cx="8" cy="7" r="2" fill="${o}" opacity="0.6"/>
+        <ellipse cx="32" cy="18" rx="2" ry="3" fill="${o}" opacity="0.7"/>
+        <circle cx="20" cy="3" r="2.5" fill="${i}" opacity="0.7"/>
+        ${body}`
+      :streak>=20
+      ?`<ellipse cx="7" cy="14" rx="3" ry="4.5" fill="${o}" opacity="0.7"/>
+        <ellipse cx="33" cy="10" rx="2.5" ry="3.5" fill="${i}" opacity="0.8"/>
+        <circle cx="8" cy="7" r="2" fill="${o}" opacity="0.5"/>
+        <ellipse cx="32" cy="18" rx="2" ry="3" fill="${o}" opacity="0.6"/>
+        <circle cx="20" cy="3" r="2.5" fill="${i}" opacity="0.6"/>
+        ${body}`
+      :streak>=15
+      ?`<ellipse cx="7" cy="14" rx="3" ry="4.5" fill="${o}" opacity="0.7"/>
+        <ellipse cx="33" cy="11" rx="2.5" ry="3.5" fill="${i}" opacity="0.8"/>
+        <circle cx="9" cy="7" r="2" fill="${o}" opacity="0.5"/>
+        <ellipse cx="31" cy="20" rx="2" ry="3" fill="${o}" opacity="0.6"/>
+        ${body}`
+      :streak>=10
+      ?`<ellipse cx="7" cy="15" rx="3" ry="4.5" fill="${o}" opacity="0.7"/>
+        <ellipse cx="33" cy="11" rx="2.5" ry="3.5" fill="${i}" opacity="0.8"/>
+        <circle cx="9" cy="8" r="2.5" fill="${o}" opacity="0.5"/>
+        ${body}`
+      :streak>=3
+      ?`<ellipse cx="7" cy="16" rx="3" ry="4" fill="${o}" opacity="0.7"/>
+        <ellipse cx="33" cy="13" rx="2.5" ry="3.5" fill="${i}" opacity="0.8"/>
+        ${body}`
+      :body;
+    return`<svg width="34" height="44" viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg" style="transform:scale(${scale});transform-origin:center">${svg}</svg>`;
+  }
+
+  const flameColor=streak===0?'#9ca3af'  // grey
+    :streak>=30?'#1d6ea8'                 // blue-white flame → dark blue text
+    :streak>=20?'#a21caf'                 // pink flame → dark fuchsia text
+    :streak>=15?'#6d28d9'                 // purple flame → dark purple text
+    :streak>=10?'#b91c1c'                 // red flame → dark red text
+    :streak>=6?'#c2410c'                  // orange flame → dark orange text
+    :streak>=3?'#b45309'                  // amber flame → dark amber text
+    :'#d97706';                           // yellow-amber flame → amber text
+  const streakLabel=streak===0?'No streak':streak===1?'1 day':`${streak} days`;
+
+  return`${missedBanner}<div class="dash-hero"><div class="dash-hero-lbl">Overall progress</div><div class="dash-hero-pct">${pct}%</div><div class="dash-hero-sub">${done} of ${total} learning points · ${daysLeft} day${daysLeft!==1?'s':''} to deadline</div><div class="dash-hero-bar"><div class="dash-hero-bar-fill" style="width:${pct}%"></div></div></div>
+  <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px">
+    <div style="width:56px;height:56px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.08);flex-shrink:0">${flameSvg(streak)}</div>
+    <div>
+      <div style="font-size:11px;color:var(--gray-400);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Study streak</div>
+      <div style="font-size:20px;font-weight:700;color:${flameColor};line-height:1">${streakLabel}</div>
+    </div>
+  </div>
+  <hr style="border:none;border-top:1px solid var(--gray-200);margin:4px 0 10px">
+  ${ctaHtml}
+  <div class="legend" style="margin-bottom:8px"><span><div class="ldot" style="background:var(--green)"></div>Confident</span><span><div class="ldot" style="background:var(--amber)"></div>Getting there</span><span><div class="ldot" style="background:var(--red)"></div>Needs work</span><span><div class="ldot" style="background:#9ca3af"></div>Unrated</span><span><div class="ldot" style="background:#fde68a"></div>Snoozed</span></div>
+  <div class="card"><div class="card-title">By topic</div>${topicRows}</div>
+  <div class="card"><div class="card-title">Week by week</div>${weekRows.join('')||'<div style="font-size:13px;color:var(--gray-400)">No schedule yet.</div>'}</div>`;
+}
+
+function abortAheadSession(){
+  if(!state.aheadDate) return;
+  const aheadDay=state.days.find(d=>d.date===state.aheadDate);
+  if(aheadDay&&!aheadDay.completed){
+    // Restore pre-session mastery ratings if snapshot exists
+    if(masterySnapshot){
+      aheadDay.lps.forEach(lp=>{
+        if(masterySnapshot[lp.id]!==undefined) state.mastery[lp.id]=masterySnapshot[lp.id];
+        else delete state.mastery[lp.id];
+      });
+    }
+    aheadDay.calendarStudy=false;
+  }
+  state.aheadDate=null;
+  state.calendarSessionDate=null;
+  masterySnapshot=null;
+  save(state);sw('Dashboard');
+}
+
+function viewDay(dateStr){
+  state.viewingDay=dateStr;
+  save(state);render();
+}
+
+function renderViewModal(){
+  const d=state.days.find(day=>day.date===state.viewingDay);
+  if(!d) return '';
+  const TL_LABEL={0:'Not rated',1:'Needs work',2:'Getting there',3:'Confident'};
+  const TL_COLOR={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const rows=d.lps.map(lp=>{
+    const m=getMastery(lp.id);
+    return`<div class="lp-item">
+      <div class="lp-text">${lp.text}</div>
+      <div class="lp-meta">${TNAMES[lp.topic-1]} · ${COLS[lp.col]}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${TL_COLOR[m]};flex-shrink:0"></div>
+        <span style="font-size:11px;color:var(--gray-500)">${TL_LABEL[m]}</span>
+      </div>
+    </div>`;
+  }).join('');
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;z-index:100;padding:20px;overflow-y:auto">
+    <div style="background:#fff;border-radius:var(--radius);width:100%;max-width:600px;overflow:hidden;margin:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--gray-200)">
+        <div>
+          <div style="font-size:15px;font-weight:500">${fmtLong(d.date)}</div>
+          <div style="font-size:12px;color:var(--gray-400);margin-top:2px">${d.lps.length} learning point${d.lps.length!==1?'s':''}</div>
+        </div>
+        <button class="btn sm" onclick="state.viewingDay=null;save(state);render()">Close</button>
+      </div>
+      <div style="padding:14px 20px">${rows}</div>
+    </div>
+  </div>`;
+}
+
+function getSnoozed(id){
+  const s=state.snoozed&&state.snoozed[id];
+  if(!s) return null;
+  const returnDate=typeof s==='string'?s:s.returnDate;
+  // Clear the record if the return date has passed — snooze is no longer active
+  if(returnDate<=dsNow()){
+    delete state.snoozed[id];
+    return null;
+  }
+  return returnDate;
+}
+
+function snoozeLP(id, days, sessionDate){
+  if(!state.snoozed) state.snoozed={};
+  const returnDate=ds(addDays(pd(sessionDate||dsNow()), days));
+  state.snoozed[id]={returnDate, fromDate:sessionDate};
+
+  // Remove from the session day
+  const session=state.days.find(d=>d.date===sessionDate);
+  if(session) session.lps=session.lps.filter(l=>l.id!==id);
+
+  // Find landing day — allow buffer days, skip only completed non-protected days
+  const lp=state.allLPs.find(l=>l.id===id);
+  if(!lp) return;
+
+  let landingDay=state.days.find(d=>d.date===returnDate&&(!d.completed||d.isProtected));
+  if(!landingDay){
+    landingDay=state.days.find(d=>d.date>returnDate&&!d.completed);
+  }
+
+  if(landingDay){
+    if(landingDay.isProtected){
+      landingDay.isProtected=false;
+      landingDay.isFreeDay=false;
+      landingDay.completed=false;
+    }
+    if(landingDay.isBuffer){
+      // Promote buffer day to a real study day to hold the snoozed LP
+      landingDay.isBuffer=false;
+    }
+    if(!landingDay.lps.find(l=>l.id===id)) landingDay.lps.push(lp);
+  } else {
+    state.days.push({date:returnDate,lps:[lp],completed:false,skipped:false});
+    state.days.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+}
+
+function linkBtns(lp){
+  if(!lp.links||!lp.links.length) return '';
+  return`<div class="lp-links">${lp.links.map(([label,url])=>`<a class="lp-link-btn" href="${url}" target="_blank" rel="noopener">&#128279; ${label}</a>`).join('')}</div>`;
+}
+
+function willSnoozeHitProtected(sessionDate){
+  const returnDateStr=ds(addDays(pd(sessionDate||dsNow()),3));
+  // Check exact return date first, then fall forward — include protected days regardless of completed
+  let landingDay=state.days.find(d=>d.date===returnDateStr&&!d.isBuffer);
+  if(!landingDay||(!landingDay.isProtected&&landingDay.completed))
+    landingDay=state.days.find(d=>d.date>returnDateStr&&!d.isBuffer&&!d.completed);
+  return landingDay&&landingDay.isProtected?landingDay.date:null;
+}
+
+function tlGroup(lp,sessionDate,noteBtn){
+  const m=getMastery(lp.id);
+  const alreadySnoozed=getSnoozed(lp.id);
+  const pending=pendingSnoozed.has(lp.id);
+  const session=sessionDate||dsNow();
+  const returnDate=fmt(ds(addDays(pd(session),3)));
+  const hitsProtected=!alreadySnoozed&&!pending&&willSnoozeHitProtected(session);
+
+  let snoozeHtml;
+  if(alreadySnoozed){
+    snoozeHtml=`<button class="snooze-btn snoozed" disabled>&#128337; Returning ${fmt(alreadySnoozed)}</button>`;
+  } else if(pending){
+    const hitsProt=willSnoozeHitProtected(session);
+    const warnNote=hitsProt?` · ⚠ overrides day off`:'';
+    snoozeHtml=`<button class="snooze-btn" style="border-color:${hitsProt?'#d97706':'var(--amber)'};color:${hitsProt?'#92400e':'var(--amber-dark)'};background:${hitsProt?'#fef3c7':'var(--amber-light)'}" onclick="pendingSnoozed.delete(${lp.id});rerender()">&#128337; Returning ${returnDate}${warnNote} — tap to cancel</button>`;
+  } else {
+    snoozeHtml=`<button class="snooze-btn" onclick="pendingSnoozed.add(${lp.id});setMastery(${lp.id},0);rerender()">&#128337; Review ${returnDate}</button>`;
+  }
+
+  const tlDisabled=pending?'opacity:.35;pointer-events:none':'';
+  return`<div class="tl-group" style="${tlDisabled}">
+    <button class="tl-btn tl-r${m===1?' on':''}" onclick="setMastery(${lp.id},${m===1?0:1});rerender()"><div class="tldot" style="background:var(--red)"></div>Needs work</button>
+    <button class="tl-btn tl-a${m===2?' on':''}" onclick="setMastery(${lp.id},${m===2?0:2});rerender()"><div class="tldot" style="background:var(--amber)"></div>Getting there</button>
+    <button class="tl-btn tl-g${m===3?' on':''}" onclick="setMastery(${lp.id},${m===3?0:3});rerender()"><div class="tldot" style="background:var(--green)"></div>Confident</button>
+  </div><div style="display:flex;align-items:center">${snoozeHtml}${noteBtn||''}</div>`;
+}
+
+function lpCard(lps,editable,addlReadings,sessionDate){
+  const today=dsNow();
+  const session=sessionDate||today;
+  const activeLps=lps.filter(lp=>{
+    const s=state.snoozed&&state.snoozed[lp.id];
+    if(!s) return true;
+    const returnDate=typeof s==='string'?s:s.returnDate;
+    return returnDate<=session;
+  });
+  const arHtml=addlReadings&&addlReadings.length?`<div class="ar-item"><div class="ar-label">Additional reading for today</div>${addlReadings.map(([,title,url])=>`<div class="ar-entry"><div class="ar-title">${title}</div><a class="ar-link" href="${url}" target="_blank" rel="noopener">&#128279; Open resource</a></div>`).join('')}</div>`:'';
+  return`<div class="card" style="padding:14px 16px">${editable?`<div class="card-title">Rate each learning point</div>`:''}
+  ${activeLps.map(lp=>{
+    const note=(state.notes&&state.notes[lp.id])||{text:'',images:[]};
+    const hasNote=note.text||(note.images&&note.images.length);
+    return`<div class="lp-item">
+      <div class="lp-text">${lp.text}</div>
+      <div class="lp-meta">${TNAMES[lp.topic-1]} · ${COLS[lp.col]}</div>
+      ${linkBtns(lp)}
+      ${tlGroup(lp,session,`<button onclick="toggleLpNote(${lp.id})" style="font-size:11px;color:${hasNote?'var(--blue)':'var(--gray-400)'};background:none;border:none;cursor:pointer;padding:2px 0 2px 8px;font-family:inherit;margin-left:auto;flex-shrink:0">${hasNote?'📝 Note':'＋ Add note'}</button>`)}
+      <div id="note-${lp.id}" style="display:none;margin-top:6px">
+        <textarea oninput="saveNote(${lp.id},this.value)" onpaste="handleNotePaste(event,${lp.id})" placeholder="Type your notes here…" style="width:100%;min-height:80px;font-size:12px;font-family:inherit;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px;resize:vertical;box-sizing:border-box;color:var(--gray-700)">${note.text||''}</textarea>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--gray-400);cursor:pointer;margin-top:4px">
+          <input type="file" accept="image/*" multiple onchange="addNoteImages(${lp.id},this)" style="display:none"/>
+          📎 Attach image
+        </label>
+        ${note.images&&note.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${note.images.map((img,idx)=>`<div style="position:relative"><img src="${img}" style="width:80px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200)"/><button onclick="removeNoteImage(${lp.id},${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;line-height:1;padding:0">✕</button></div>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>${arHtml}`;
+}
+
+function handleNotePaste(e,id){
+  const items=[...(e.clipboardData||e.originalEvent?.clipboardData||{}).items||[]];
+  const imageItems=items.filter(i=>i.type.startsWith('image/'));
+  if(!imageItems.length) return; // let normal text paste proceed
+  e.preventDefault();
+  if(!state.notes) state.notes={};
+  if(!state.notes[id]) state.notes[id]={text:'',images:[]};
+  let loaded=0;
+  imageItems.forEach(item=>{
+    const file=item.getAsFile();
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      state.notes[id].images.push(ev.target.result);
+      loaded++;
+      if(loaded===imageItems.length){save(state);rerender();}
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function toggleLpNote(id){
+  const el=document.getElementById('note-'+id);
+  if(!el) return;
+  const opening=el.style.display==='none';
+  el.style.display=opening?'block':'none';
+  if(opening) openNotes.add(id); else openNotes.delete(id);
+}
+
+function restoreOpenNotes(){
+  openNotes.forEach(id=>{
+    const el=document.getElementById('note-'+id);
+    if(el) el.style.display='block';
+  });
+}
+
+function toggleNoteEdit(id){
+  const editDiv=document.getElementById('note-edit-'+id);
+  const btn=document.getElementById('note-edit-btn-'+id);
+  if(!editDiv||!btn) return;
+  const isEditing=editDiv.style.display==='none';
+  editDiv.style.display=isEditing?'block':'none';
+  btn.textContent=isEditing?'Done editing':'Edit';
+  if(isEditing) editDiv.querySelector('textarea')?.focus();
+}
+
+function saveNote(id,text){
+  if(!state.notes) state.notes={};
+  if(!state.notes[id]) state.notes[id]={text:'',images:[]};
+  state.notes[id].text=text;
+  save(state);
+  // Update view div inline without rerender
+  const viewDiv=document.getElementById('note-view-'+id);
+  if(viewDiv) viewDiv.innerHTML=text?linkify(text):'<span style="color:var(--gray-300);font-style:italic">No notes yet</span>';
+  // Update Study tab note button label
+  const btn=document.querySelector(`button[onclick="toggleLpNote(${id})"]`);
+  if(btn) btn.textContent=(text||(state.notes[id].images&&state.notes[id].images.length))?'📝 Note':'＋ Add note';
+}
+
+function addNoteImages(id,input){
+  if(!state.notes) state.notes={};
+  if(!state.notes[id]) state.notes[id]={text:'',images:[]};
+  const files=[...input.files];
+  let loaded=0;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      state.notes[id].images.push(e.target.result);
+      loaded++;
+      if(loaded===files.length){save(state);rerender();}
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeNoteImage(id,idx){
+  if(!state.notes||!state.notes[id]) return;
+  state.notes[id].images.splice(idx,1);
+  save(state);rerender();
+}
+
+function renderNotes(){
+  const notesSort=state.notesSort||'topic'; // 'topic' | 'mastery' | 'images'
+  const notesMastery=state.notesMastery||[]; // [] = all
+
+  const hasAny=state.notes&&state.allLPs.some(lp=>{const n=state.notes[lp.id];return n&&(n.text||n.images&&n.images.length);});
+  if(!hasAny){
+    return`<div class="alert info">No notes yet. Use the '＋ Add note' button on any learning point in the Study tab.</div>`;
+  }
+
+  const TL_DOT={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const TL_LABEL={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+
+  const btn=(label,key,val)=>{
+    const on=notesSort===key&&(!val||notesSort===key);
+    return`<button onclick="state.notesSort='${key}';save(state);rerender()" style="font-size:11px;padding:4px 12px;border-radius:20px;border:1.5px solid ${notesSort===key?'var(--gray-700)':'var(--gray-200)'};background:${notesSort===key?'var(--gray-900)':'#fff'};color:${notesSort===key?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">${label}</button>`;
+  };
+
+  const masteryChips=[0,1,2,3].map(v=>{
+    const on=notesMastery.includes(v);
+    return`<button onclick="(function(){if(!state.notesMastery)state.notesMastery=[];const i=state.notesMastery.indexOf(${v});if(i>-1)state.notesMastery.splice(i,1);else state.notesMastery.push(${v});save(state);rerender()})()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?TL_DOT[v]:'var(--gray-200)'};background:${on?(v===0?'var(--gray-100)':v===1?'var(--red-light)':v===2?'var(--amber-light)':'var(--green-light)'):'#fff'};color:${on?(v===0?'var(--gray-600)':v===1?'var(--red-dark)':v===2?'var(--amber-dark)':'var(--green-dark)'):'var(--gray-500)'};cursor:pointer;font-family:inherit">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${TL_DOT[v]};vertical-align:middle;margin-right:3px"></span>${TL_LABEL[v]}</button>`;
+  }).join('');
+
+  // Print settings variables — must be declared before filterBar
+  const printSettingsOpen=state.notesPrintSettingsOpen||false;
+  const printTopics=state.notesPrintTopics||[1,2,3,4,5,6];
+  const printMastery=state.notesPrintMastery||[0,1,2,3];
+  const printImages=state.notesPrintImages!==false;
+  const printSort=state.notesPrintSort||'topic';
+  const TL_DOT2={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const TL_LABEL2={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+
+  const topicChips=[1,2,3,4,5,6].map(t=>{
+    const on=(printTopics||[]).includes(t);
+    return`<button onclick="(function(){if(!state.notesPrintTopics)state.notesPrintTopics=[1,2,3,4,5,6];const i=state.notesPrintTopics.indexOf(${t});if(i>-1)state.notesPrintTopics.splice(i,1);else state.notesPrintTopics.push(${t});save(state);rerender()})()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?'var(--gray-700)':'var(--gray-200)'};background:${on?'var(--gray-900)':'#fff'};color:${on?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">T${t}</button>`;
+  }).join('');
+
+  const masteryChips2=[0,1,2,3].map(v=>{
+    const on=(printMastery||[]).includes(v);
+    return`<button onclick="(function(){if(!state.notesPrintMastery)state.notesPrintMastery=[0,1,2,3];const i=state.notesPrintMastery.indexOf(${v});if(i>-1)state.notesPrintMastery.splice(i,1);else state.notesPrintMastery.push(${v});save(state);rerender()})()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?TL_DOT2[v]:'var(--gray-200)'};background:${on?(v===0?'var(--gray-100)':v===1?'var(--red-light)':v===2?'var(--amber-light)':'var(--green-light)'):'#fff'};color:${on?(v===0?'var(--gray-600)':v===1?'var(--red-dark)':v===2?'var(--amber-dark)':'var(--green-dark)'):'var(--gray-500)'};cursor:pointer;font-family:inherit">
+      <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${TL_DOT2[v]};vertical-align:middle;margin-right:3px"></span>${TL_LABEL2[v]}</button>`;
+  }).join('');
+
+  const sortChips=['topic','mastery'].map(s=>{
+    const on=printSort===s;
+    return`<button onclick="state.notesPrintSort='${s}';save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid ${on?'var(--gray-700)':'var(--gray-200)'};background:${on?'var(--gray-900)':'#fff'};color:${on?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">${s==='topic'?'By topic':'By mastery'}</button>`;
+  }).join('');
+
+  const filterBar=`<div style="margin-bottom:14px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;justify-content:space-between">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--gray-400)">Sort:</span>
+        ${btn('By topic','topic')}
+        ${btn('By mastery','mastery')}
+        ${btn('Images only','images')}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <a onclick="state.notesPrintSettingsOpen=!state.notesPrintSettingsOpen;save(state);rerender()" style="font-size:12px;color:var(--gray-400);cursor:pointer;text-decoration:underline;user-select:none">${printSettingsOpen?'Hide print settings':'Print settings'}</a>
+        <button class="btn primary" onclick="exportNotesPDF()" style="font-size:12px;padding:5px 12px">🖨 Print Summary</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:11px;color:var(--gray-400)">Filter:</span>
+      ${masteryChips}
+      ${notesMastery.length?`<button onclick="state.notesMastery=[];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">✕ Clear</button>`:''}
+    </div>
+    ${printSettingsOpen?`<div class="card" style="margin-top:10px;background:var(--gray-50)">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Topics</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${topicChips}
+            <button onclick="state.notesPrintTopics=[1,2,3,4,5,6];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">All</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Mastery</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">${masteryChips2}
+            <button onclick="state.notesPrintMastery=[0,1,2,3];save(state);rerender()" style="font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">All</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Sort</div>
+            <div style="display:flex;gap:5px">${sortChips}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--gray-400);margin-bottom:5px">Images</div>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--gray-600)">
+              <input type="checkbox" ${printImages?'checked':''} onchange="state.notesPrintImages=this.checked;save(state)"/>
+              Include images
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>`:''}
+  </div>`;
+
+  // Get LP entries with notes
+  let entries=state.allLPs.filter(lp=>{
+    const n=state.notes&&state.notes[lp.id];
+    if(!n||(!n.text&&!(n.images&&n.images.length))) return false;
+    if(notesSort==='images'&&!(n.images&&n.images.length)) return false;
+    if(notesMastery.length&&!notesMastery.includes(getMastery(lp.id))) return false;
+    return true;
+  });
+
+  // Sort
+  if(notesSort==='mastery') entries.sort((a,b)=>getMastery(b.id)-getMastery(a.id)||a.topic-b.topic);
+  else entries.sort((a,b)=>a.topic-b.topic||a.id-b.id);
+
+  if(!entries.length) return filterBar+`<div class="alert info">No notes match the current filter.</div>`;
+
+  // Group by topic (unless sorting by mastery)
+  let html='';
+  if(notesSort==='mastery'){
+    // Group by mastery level
+    [3,2,1,0].forEach(mv=>{
+      const group=entries.filter(lp=>getMastery(lp.id)===mv);
+      if(!group.length) return;
+      html+=`<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${TL_DOT[mv]}"></div>
+          <div class="card-title" style="margin:0">${TL_LABEL[mv]}</div>
+        </div>`;
+      group.forEach(lp=>{ html+=noteRow(lp); });
+      html+='</div>';
+    });
+  } else {
+    // Group by topic
+    let lastTopic=-1;
+    entries.forEach(lp=>{
+      if(lp.topic!==lastTopic){
+        if(lastTopic!==-1) html+='</div>';
+        html+=`<div class="card" style="margin-bottom:12px"><div class="card-title" style="font-size:11px;color:var(--gray-500)">${TNAMES[lp.topic-1]}</div>`;
+        lastTopic=lp.topic;
+      }
+      html+=noteRow(lp);
+    });
+    if(lastTopic!==-1) html+='</div>';
+  }
+
+  return filterBar+html;
+}
+
+function linkify(text){
+  const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return escaped.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;word-break:break-all">$1</a>');
+}
+
+function noteRow(lp){
+  const n=state.notes[lp.id];
+  const m=getMastery(lp.id);
+  const TL_DOT={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  return`<div style="padding:10px 0;border-bottom:1px solid var(--gray-100)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:4px">
+      <div style="font-size:12px;font-weight:500;color:var(--gray-700);line-height:1.4;flex:1">${lp.text}</div>
+      <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <div style="width:7px;height:7px;border-radius:50%;background:${TL_DOT[m]}"></div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--gray-400);margin-bottom:6px">${COLS[lp.col]}</div>
+    <div id="note-view-${lp.id}" style="font-size:13px;color:var(--gray-700);line-height:1.6;white-space:pre-wrap;background:var(--gray-50);border-radius:var(--radius-sm);padding:8px;margin-bottom:4px">${n.text?linkify(n.text):'<span style="color:var(--gray-300);font-style:italic">No notes yet</span>'}<div style="text-align:right;margin-top:6px"><a onclick="toggleNoteEdit(${lp.id})" id="note-edit-btn-${lp.id}" style="font-size:11px;color:var(--gray-400);cursor:pointer;text-decoration:underline;user-select:none">Edit</a></div></div>
+    <div id="note-edit-${lp.id}" style="display:none;margin-top:4px">
+      <textarea oninput="saveNote(${lp.id},this.value)" onpaste="handleNotePaste(event,${lp.id})" placeholder="Type your notes here…" style="width:100%;min-height:${n.text?Math.max(60,n.text.split('\n').length*20+20):60}px;font-size:13px;font-family:inherit;border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:8px;resize:vertical;box-sizing:border-box;color:var(--gray-700);line-height:1.6;background:#fff">${(n.text||'').replace(/</g,'&lt;')}</textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-400);cursor:pointer">
+          <input type="file" accept="image/*" multiple onchange="addNoteImages(${lp.id},this)" style="display:none"/>
+          📎 Attach image
+        </label>
+        ${n.images&&n.images.length?`<span style="font-size:11px;color:var(--gray-400)">${n.images.length} image${n.images.length!==1?'s':''}</span>`:''}
+      </div>
+      ${n.images&&n.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${n.images.map((img,idx)=>`<div style="position:relative"><img src="${img}" style="width:100px;height:75px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200)"/><button onclick="removeNoteImage(${lp.id},${idx})" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:9px;cursor:pointer;line-height:1;padding:0">✕</button></div>`).join('')}</div>`:''}
+    </div>
+    ${n.images&&n.images.length?`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${n.images.map(img=>`<img src="${img}" style="width:100px;height:75px;object-fit:cover;border-radius:4px;border:1px solid var(--gray-200);cursor:pointer" onclick="openNoteImage('${img}')"/>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function openNoteImage(src){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;cursor:pointer';
+  overlay.onclick=()=>document.body.removeChild(overlay);
+  const img=document.createElement('img');
+  img.src=src;
+  img.style.cssText='max-width:90vw;max-height:90vh;border-radius:8px';
+  overlay.appendChild(img);
+  document.body.appendChild(overlay);
+}
+
+function getAdditionalReadingsForDay(dateStr){
+  // Only assign to incomplete future study days so readings appear alongside upcoming sessions
+  const studyDays=state.days.filter(d=>!d.isBuffer&&!d.skipped&&!d.completed&&d.date>=dsNow()).map(d=>d.date).sort();
+  if(!studyDays.length) return [];
+  const n=ADDITIONAL.length,total=studyDays.length;
+  const interval=Math.max(1,Math.floor(total/n));
+  const result=[];
+  ADDITIONAL.forEach((ar,i)=>{
+    const assignedDate=studyDays[Math.min(i*interval,total-1)];
+    if(assignedDate===dateStr) result.push(ar);
+  });
+  return result;
+}
+
+function activeLpCount(day){
+  if(!day||!day.lps) return 0;
+  if(day.completed) return 0; // all LPs already studied
+  return day.lps.filter(lp=>{
+    const s=state.snoozed&&state.snoozed[lp.id];
+    if(!s) return true;
+    const returnDate=typeof s==='string'?s:s.returnDate;
+    return returnDate<=day.date;
+  }).length;
+}
+
+function flushSnoozed(sessionDate){
+  pendingSnoozed.forEach(id=>snoozeLP(id,3,sessionDate));
+  pendingSnoozed.clear();
+}
+
+function markDone(){
+  const d=getToday();if(!d)return;
+  flushSnoozed(dsNow());
+  d.completed=true;d.skipped=false;
+  if(!state.todayCompletedDates) state.todayCompletedDates=[];
+  if(!state.todayCompletedDatesDay) state.todayCompletedDatesDay=dsNow();
+  if(state.todayCompletedDatesDay!==dsNow()){state.todayCompletedDates=[];state.todayCompletedDatesDay=dsNow();}
+  if(!state.todayCompletedDates.includes(dsNow())) state.todayCompletedDates.push(dsNow());
+  recalc(state);save(state);sw('Dashboard');
+}
+
+function skipDay(){
+  const d=getToday();if(!d)return;
+  pendingSnoozed.clear();
+  d.skipped=true;d.completed=false;
+  recalc(state);save(state);render();
+}
+
+// Returns the next incomplete future study day after all completed-ahead days
+function getNextStudyDay(){
+  const today=dsNow();
+  return state.days.find(d=>d.date>today&&!d.isBuffer&&!d.isProtected&&!d.completed&&!d.skipped&&d.lps.length>0);
+}
+
+// Study-ahead: store the date of the day being studied early in state.aheadDate
+// (we use state so it survives tab switches, but we clear it on resolution)
+function startStudyAhead(dateStr,fromCalendar){
+  state.aheadDate=dateStr;
+  if(fromCalendar){
+    const d=state.days.find(day=>day.date===dateStr);
+    if(d) d.calendarStudy=true;
+    state.calendarSessionDate=dateStr; // persists across tab switches
+  }
+  const aheadDay=state.days.find(d=>d.date===dateStr);
+  if(aheadDay){
+    masterySnapshot={};
+    aheadDay.lps.forEach(lp=>{
+      masterySnapshot[lp.id]=state.mastery?state.mastery[lp.id]:undefined;
+    });
+  }
+  save(state);sw('Study');
+}
+
+function resumeCalendarSession(){
+  if(!state.calendarSessionDate) return;
+  state.aheadDate=state.calendarSessionDate;
+  // Rebuild snapshot for the session day
+  const aheadDay=state.days.find(d=>d.date===state.aheadDate);
+  if(aheadDay){
+    masterySnapshot={};
+    aheadDay.lps.forEach(lp=>{
+      masterySnapshot[lp.id]=state.mastery?state.mastery[lp.id]:undefined;
+    });
+  }
+  save(state);sw('Study');
+}
+
+function markAheadDone(){
+  if(!state.aheadDate)return;
+  flushSnoozed(state.aheadDate);
+  const d=state.days.find(day=>day.date===state.aheadDate);
+  if(d){d.completed=true;d.skipped=false;}
+  if(!state.todayCompletedDates) state.todayCompletedDates=[];
+  if(!state.todayCompletedDatesDay) state.todayCompletedDatesDay=dsNow();
+  if(state.todayCompletedDatesDay!==dsNow()){state.todayCompletedDates=[];state.todayCompletedDatesDay=dsNow();}
+  if(!state.todayCompletedDates.includes(state.aheadDate)) state.todayCompletedDates.push(state.aheadDate);
+  state.lastAheadDate=state.aheadDate;
+  masterySnapshot=null;state.calendarSessionDate=null;state.pendingResolve=true;
+  save(state);render();
+}
+
+function resolveAhead(takeOff){
+  if(takeOff){
+    const aheadDate=state.aheadDate||state.lastAheadDate;
+    const d=state.days.find(day=>day.date===aheadDate);
+    if(d) d.isProtected=true;
+    save(state);
+  } else {
+    recalc(state);save(state);
+  }
+  state.aheadDate=null;state.pendingResolve=false;state.resolvedAhead=true;state.resolveShowWarning=false;
+  sw('Dashboard');
+}
+
+function renderResolvePopup(){
+  const aheadDate=state.aheadDate||state.lastAheadDate;
+  const d=aheadDate?state.days.find(day=>day.date===aheadDate):null;
+  const dateLabel=d?fmt(d.date):'that day';
+
+  return`<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px">
+    <div style="background:#fff;border-radius:var(--radius);padding:26px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.22)">
+      <div style="font-size:16px;font-weight:500;margin-bottom:6px">You're a day ahead! 🎉</div>
+      <div style="font-size:13px;color:var(--gray-500);margin-bottom:22px;line-height:1.6">You completed <strong>${dateLabel}</strong> early. What would you like to do with that day's time slot?</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn primary" style="justify-content:flex-start;text-align:left;padding:14px 16px;height:auto;width:100%" onclick="resolveAhead(true)">
+          <div>
+            <div style="font-weight:500">Take that day off</div>
+            <div style="font-size:11px;opacity:.8;margin-top:3px">Mark ${dateLabel} as a protected rest day</div>
+          </div>
+        </button>
+        <button class="btn" style="justify-content:flex-start;text-align:left;padding:14px 16px;height:auto" onclick="resolveAhead(false)">
+          <div>
+            <div style="font-weight:500">Spread remaining points</div>
+            <div style="font-size:11px;color:var(--gray-400);margin-top:3px">Redistribute the remaining load across future days</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderToday(){
+  const today=dsNow(),daysLeft=Math.max(0,diffDays(pd(dsNow()),pd(state.deadline)));
+  const dayObj=getToday();
+  const todayReadings=getAdditionalReadingsForDay(today);
+
+  // Studying-ahead mode: show future day as if it were today
+  if(state.aheadDate){
+    const aheadDay=state.days.find(d=>d.date===state.aheadDate);
+    if(aheadDay&&!aheadDay.completed){
+      return`<div class="today-hdr"><div><div class="today-date">${fmtLong(aheadDay.date)}</div><div class="today-sub">Studying ahead · ${daysLeft} day${daysLeft!==1?'s':''} until deadline</div></div><span class="badge ba">Ahead</span></div>
+        ${lpCard(aheadDay.lps,true,getAdditionalReadingsForDay(aheadDay.date),aheadDay.date)}
+        <div class="btn-row">
+          <button class="btn primary" onclick="markAheadDone()">Mark ${fmt(aheadDay.date)} as done</button>
+          <button class="btn danger" onclick="abortAheadSession()">Cancel this session</button>
+        </div>`;
+    }
+  }
+
+  const dateLabel=fmtLong(today);
+  let badge='',content='',actions='';
+  if(!dayObj){
+    const next=state.days.find(d=>d.date>today&&!d.completed&&!d.isBuffer&&!d.isProtected);
+    badge=`<span class="badge bk">No session</span>`;
+    content=`<div class="alert info">No session today.${next?' Next: '+fmt(next.date):' All done!'}</div>`;
+  } else if(dayObj.isBuffer||dayObj.isProtected){
+    badge=`<span class="badge bg">Free day</span>`;
+    content=`<div class="alert success">Protected day — enjoy the break!</div>`;
+  } else if(dayObj.completed){
+    badge=`<span class="badge bg">Done</span>`;
+    content=`<div class="alert success">${activeLpCount(dayObj)} learning point${activeLpCount(dayObj)!==1?'s':''} completed today.</div>${lpCard(dayObj.lps,true,todayReadings,today)}`;
+  } else if(dayObj.skipped){
+    badge=`<span class="badge ba">Skipped</span>`;
+    content=`<div class="alert warning">Today was skipped. Load redistributed across remaining study days.</div>`;
+  } else {
+    badge=`<span class="badge bb">${dayObj.lps.length} point${dayObj.lps.length!==1?'s':''}</span>`;
+    content=lpCard(dayObj.lps,true,todayReadings,today);
+    actions=`<div class="btn-row"><button class="btn primary" onclick="markDone()">Mark day as done</button><button class="btn" onclick="skipDay()">Skip today</button></div>`;
+  }
+  return`<div class="today-hdr"><div><div class="today-date">${dateLabel}</div><div class="today-sub">${daysLeft} day${daysLeft!==1?'s':''} until deadline</div></div>${badge}</div>${content}${actions}`;
+}
+
+function renderProgress(){
+  const total=state.allLPs.length,dl=doneLPs(),done=dl.length,pct=Math.round(done/total*100),m=masteryOf(dl);
+  const stuDays=state.days.filter(d=>d.completed).length,bufCnt=state.days.filter(d=>d.isBuffer).length;
+  const studyDays=state.days.filter(d=>!d.isBuffer),last=studyDays[studyDays.length-1];
+  const TL_DOT={0:'#d1d5db',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const TL_LABEL={0:'Not done',1:'Needs work',2:'Getting there',3:'Confident'};
+  const expanded=new Set(state.topicExpanded||[]);
+  const doneLPIds=new Set([
+    ...state.days.filter(d=>d.completed).flatMap(d=>d.lps.map(l=>l.id)),
+    ...(state.excludedIds||[])
+  ]);
+  const excludedLpSet=new Set(state.excludedIds||[]);
+  // Build LP id → scheduled date map
+  const lpDateMap={};
+  state.days.forEach(d=>{if(!d.isBuffer)d.lps.forEach(l=>{lpDateMap[l.id]=d.date;});});
+
+  const _progSnoozedIds=getSnoozedIds();
+  const topicRows=TNAMES.map((n,i)=>{
+    const t=i+1,tlps=state.allLPs.filter(l=>l.topic===t);if(!tlps.length)return'';
+    const completedTopicLps=state.days.filter(d=>d.completed).flatMap(d=>d.lps).filter(l=>l.topic===t);
+    const completedIds=new Set(completedTopicLps.map(l=>l.id));
+    const tdl=[
+      ...completedTopicLps,
+      ...state.allLPs.filter(l=>l.topic===t&&excludedLpSet.has(l.id)),
+      ...state.allLPs.filter(l=>l.topic===t&&_progSnoozedIds.has(l.id)&&!excludedLpSet.has(l.id)&&!completedIds.has(l.id))
+    ],m2=masteryOf(tdl);
+    const isOpen=expanded.has(t);
+    const lpList=isOpen?`<div style="margin-top:10px;border-top:1px solid var(--gray-100);padding-top:8px">
+      ${tlps.map(lp=>{
+        const m=getMastery(lp.id);
+        const done=doneLPIds.has(lp.id);
+        const date=lpDateMap[lp.id];
+        const dateLabel=date?(done?`· Done ${fmt(date)}`:`· Due ${fmt(date)}`):'';
+        return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--gray-100)">
+          <div style="flex:1;font-size:12px;color:${done?'var(--gray-700)':'var(--gray-400)'};line-height:1.5">${lp.text} <span style="color:var(--gray-300);font-size:11px">${dateLabel}</span></div>
+          <div style="flex-shrink:0;display:flex;align-items:center;gap:4px;white-space:nowrap">
+            <div style="width:7px;height:7px;border-radius:50%;background:${TL_DOT[done?m:0]}"></div>
+            <span style="font-size:10px;color:${done?TL_DOT[done?m:0]:'var(--gray-300)'}">${done?TL_LABEL[m]:TL_LABEL[0]}</span>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`:'';
+    return`<div class="tp-row">
+      <div class="tp-label" style="cursor:pointer" onclick="toggleTopicExpand(${t})">
+        <span class="tp-name">${n}</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="tp-counts"><span class="tp-g">${m2[3]} confident</span><span class="tp-a">${m2[2]} getting there</span><span class="tp-r">${m2[1]} needs work</span><span class="tp-tot">${tdl.length}/${tlps.length}</span></div>
+          <span style="font-size:11px;color:var(--gray-400)">${isOpen?'▲':'▼'}</span>
+        </div>
+      </div>
+      ${segBar(tlps.length,tdl,8)}
+      ${lpList}
+    </div>`;
+  }).join('');
+  // Additional readings progress — a reading is seen when its assigned day is completed
+  const totalAR=ADDITIONAL.length;
+  const allDays=state.days.filter(d=>!d.isBuffer&&!d.skipped).map(d=>d.date).sort();
+  const completedDates=new Set(state.days.filter(d=>d.completed).map(d=>d.date));
+  let seenAR=0;
+  if(allDays.length){
+    const interval=Math.max(1,Math.floor(allDays.length/totalAR));
+    ADDITIONAL.forEach((_,i)=>{
+      const assignedDate=allDays[Math.min(i*interval,allDays.length-1)];
+      if(completedDates.has(assignedDate)) seenAR++;
+    });
+  }
+  // Build assigned date per additional reading
+  const arAssignments=[];
+  if(allDays.length){
+    const interval=Math.max(1,Math.floor(allDays.length/totalAR));
+    ADDITIONAL.forEach((_,i)=>{
+      const assignedDate=allDays[Math.min(i*interval,allDays.length-1)];
+      arAssignments.push(assignedDate);
+    });
+  }
+
+  const arPct=Math.round(seenAR/totalAR*100);
+  const arBar=`<div class="pbar-wrap" style="height:8px"><div style="width:${arPct}%;height:100%;background:var(--amber);border-radius:4px;transition:width .4s"></div></div>`;
+
+  const arExpanded=state.arExpanded||false;
+  const arList=arExpanded?`<div style="margin-top:10px;border-top:1px solid var(--gray-100);padding-top:8px">
+    ${ADDITIONAL.map(([,title,url],i)=>{
+      const date=arAssignments[i];
+      const seen=date&&completedDates.has(date);
+      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--gray-100)">
+        <div style="flex:1;font-size:12px;color:${seen?'var(--gray-700)':'var(--gray-400)'};line-height:1.5">
+          <a href="${url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">${title}</a>
+          <span style="color:var(--gray-300);font-size:11px"> · ${date?(seen?`Seen ${fmt(date)}`:`Due ${fmt(date)}`):'—'}</span>
+        </div>
+        <div style="flex-shrink:0">
+          ${seen
+            ?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-light);color:var(--amber-dark);font-weight:500">Seen</span>`
+            :`<span style="font-size:10px;color:var(--gray-300)">Upcoming</span>`
+          }
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`:'';
+
+  const arCard=`<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="state.arExpanded=!state.arExpanded;save(state);rerender()">
+      <div class="card-title" style="margin-bottom:0">Additional readings</div>
+      <span style="font-size:11px;color:var(--gray-400)">${arExpanded?'▲':'▼'}</span>
+    </div>
+    <div style="margin-top:10px">${arBar}</div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-top:5px"><span>${arPct}% seen</span><span>${seenAR}/${totalAR} readings</span></div>
+    ${arList}
+  </div>`;
+
+  return`<div class="metrics">
+    <div class="metric" onclick="state.historyFilter=[3];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--green)">${m[3]}</div><div class="lbl">Confident</div></div>
+    <div class="metric" onclick="state.historyFilter=[2];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--amber)">${m[2]}</div><div class="lbl">Getting there</div></div>
+    <div class="metric" onclick="state.historyFilter=[1];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--red)">${m[1]}</div><div class="lbl">Needs work</div></div>
+  </div>
+  <div class="card"><div class="card-title">Overall coverage</div><div class="legend"><span><div class="ldot" style="background:var(--green)"></div>Confident</span><span><div class="ldot" style="background:var(--amber)"></div>Getting there</span><span><div class="ldot" style="background:var(--red)"></div>Needs work</span><span><div class="ldot" style="background:#9ca3af"></div>Unrated</span><span><div class="ldot" style="background:#fde68a"></div>Snoozed</span></div>${segBar(total,dl,12)}<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-top:5px"><span>${pct}% covered</span><span>${done}/${total} learning points</span></div></div>
+  ${arCard}
+  <div class="card"><div class="card-title">By topic</div>${topicRows}</div>
+  <div class="card"><div class="card-title">Timeline</div><div style="font-size:13px;color:var(--gray-500);line-height:2.4"><div>Start: <strong style="color:var(--gray-700)">${fmt(state.startDate)}</strong></div><div>Target finish: <strong style="color:var(--gray-700)">${last?fmt(last.date):'—'}</strong></div><div>Deadline: <strong style="color:var(--gray-700)">${fmt(state.deadline)}</strong></div><div>Buffer: <strong style="color:var(--gray-700)">${bufCnt} free day${bufCnt!==1?'s':''}</strong></div><div>Days studied: <strong style="color:var(--gray-700)">${stuDays}</strong></div></div></div>`;
+}
+
+function toggleTopicExpand(t){
+  if(!state.topicExpanded) state.topicExpanded=[];
+  const idx=state.topicExpanded.indexOf(t);
+  if(idx>-1) state.topicExpanded.splice(idx,1);
+  else state.topicExpanded.push(t);
+  save(state);rerender();
+}
+
+function setHistoryFilter(v){
+  if(!state.historyFilter) state.historyFilter=[];
+  const idx=state.historyFilter.indexOf(v);
+  if(idx>-1) state.historyFilter.splice(idx,1);
+  else state.historyFilter.push(v);
+  save(state);rerender();
+}
+
+function renderHistory(){
+  const sort=state.historySort||'date'; // 'date' or 'lastDone'
+  const completedDays=state.days
+    .filter(d=>d.completed&&d.lps.length>0)
+    .sort((a,b)=>sort==='lastDone'
+      ? (state.todayCompletedDates||[]).indexOf(b.date) - (state.todayCompletedDates||[]).indexOf(a.date)
+      : b.date.localeCompare(a.date));
+
+  if(!completedDays.length&&!(state.excludedIds||[]).length){
+    return`<div class="alert info">No completed days yet. Your history will appear here as you study.</div>`;
+  }
+
+  const TL_DOT={0:'#9ca3af',1:'var(--red)',2:'var(--amber)',3:'var(--green)'};
+  const TL_LABEL={0:'Rate',1:'Needs work',2:'Getting there',3:'Confident'};
+  const active=state.historyRating!=null?state.historyRating:null;
+  const filters=Array.isArray(state.historyFilter)&&state.historyFilter.length>0?state.historyFilter:null;
+
+  // Filter chips
+  const chips=[
+    {v:1,label:'Needs work',dot:'var(--red)',bg:'var(--red-light)',tc:'var(--red-dark)'},
+    {v:2,label:'Getting there',dot:'var(--amber)',bg:'var(--amber-light)',tc:'var(--amber-dark)'},
+    {v:3,label:'Confident',dot:'var(--green)',bg:'var(--green-light)',tc:'var(--green-dark)'},
+    {v:0,label:'Unrated',dot:'#9ca3af',bg:'var(--gray-100)',tc:'var(--gray-600)'},
+  ];
+  const filterBar=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+    <span style="font-size:11px;color:var(--gray-400);margin-right:2px">Show:</span>
+    ${chips.map(c=>{
+      const on=filters&&filters.includes(c.v);
+      return`<button onclick="setHistoryFilter(${c.v})" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:4px 10px;border-radius:20px;border:1.5px solid ${on?c.dot:'var(--gray-200)'};background:${on?c.bg:'#fff'};color:${on?c.tc:'var(--gray-500)'};cursor:pointer;font-family:inherit;font-weight:${on?'500':'400'}"><div style="width:7px;height:7px;border-radius:50%;background:${c.dot}"></div>${c.label}</button>`;
+    }).join('')}
+    ${filters?`<button onclick="state.historyFilter=[];save(state);rerender()" style="font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">✕ Clear</button>`:''}
+    <span style="margin-left:auto;display:flex;gap:4px">
+      <button onclick="state.historySort='date';save(state);rerender()" style="font-size:11px;padding:4px 10px;border-radius:20px;border:1.5px solid ${sort==='date'?'var(--gray-700)':'var(--gray-200)'};background:${sort==='date'?'var(--gray-900)':'#fff'};color:${sort==='date'?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">By date</button>
+      <button onclick="state.historySort='lastDone';save(state);rerender()" style="font-size:11px;padding:4px 10px;border-radius:20px;border:1.5px solid ${sort==='lastDone'?'var(--gray-700)':'var(--gray-200)'};background:${sort==='lastDone'?'var(--gray-900)':'#fff'};color:${sort==='lastDone'?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit">Last done</button>
+    </span>
+  </div>`;
+
+  const cards=completedDays.map(d=>{
+    const isProtected=d.isProtected?` <span class="badge" style="background:#f3e8ff;color:#7c3aed">protected</span>`:'';
+
+    // Apply filter to this day's LPs
+    const filteredLps=!filters?d.lps:d.lps.filter(lp=>filters.includes(getMastery(lp.id)));
+
+    // LPs snoozed from this day — show if no filter or if unrated (0) is in filters
+    const snoozedFromDay=(!filters||filters.includes(0))?Object.entries(state.snoozed||{})
+      .filter(([,s])=>typeof s==='object'&&s.fromDate===d.date)
+      .map(([idStr,s])=>{
+        const lp=state.allLPs.find(l=>l.id===parseInt(idStr));
+        return lp?{lp,returnDate:s.returnDate}:null;
+      }).filter(Boolean):[];
+
+    // Skip the whole day card if nothing matches
+    if(!filteredLps.length&&!snoozedFromDay.length) return '';
+
+    const rows=filteredLps.map(lp=>{
+      const m=getMastery(lp.id);
+      const isOpen=active!=null&&active===lp.id;
+      const ratingPanel=isOpen?`<div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap">
+        ${[1,2,3].map(v=>`<button onclick="setMastery(${lp.id},${m===v?0:v});state.historyRating=null;save(state);rerender()" style="font-size:11px;padding:3px 8px;border-radius:var(--radius-sm);border:1.5px solid ${v===m?'currentColor':'var(--gray-200)'};background:${v===m?(v===1?'var(--red-light)':v===2?'var(--amber-light)':'var(--green-light)'):'#fff'};color:${v===1?'var(--red-dark)':v===2?'var(--amber-dark)':'var(--green-dark)'};cursor:pointer;font-family:inherit">${v===1?'Needs work':v===2?'Getting there':'Confident'}</button>`).join('')}
+        <button onclick="state.historyRating=null;rerender()" style="font-size:11px;padding:3px 8px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);background:#fff;color:var(--gray-400);cursor:pointer;font-family:inherit">cancel</button>
+      </div>`:'';
+      return`<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--gray-100)">
+        <div style="flex:1;font-size:12px;color:var(--gray-700);line-height:1.45">${lp.text}${ratingPanel}</div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:5px;white-space:nowrap">
+          <div style="width:7px;height:7px;border-radius:50%;background:${TL_DOT[m]}"></div>
+          <span onclick="state.historyRating=${isOpen?'null':lp.id};rerender()" style="font-size:11px;color:${m>0?TL_DOT[m]:'var(--gray-400)'};cursor:pointer;text-decoration:underline;text-underline-offset:2px">${TL_LABEL[m]}</span>
+        </div>
+      </div>`;
+    }).join('');
+
+    const snoozedRows=snoozedFromDay.map(({lp,returnDate})=>`
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--gray-100);opacity:.7">
+        <div style="flex:1;font-size:12px;color:var(--gray-700);line-height:1.45">${lp.text}</div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:5px;white-space:nowrap">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>
+          <span style="font-size:11px;color:var(--amber-dark)">&#128337; Returns ${fmt(returnDate)}</span>
+        </div>
+      </div>`).join('');
+
+    const totalPts=d.lps.length+Object.entries(state.snoozed||{}).filter(([,s])=>typeof s==='object'&&s.fromDate===d.date).length;
+    const rated=d.lps.filter(lp=>getMastery(lp.id)>0).length;
+    const snoozedCount=Object.entries(state.snoozed||{}).filter(([,s])=>typeof s==='object'&&s.fromDate===d.date).length;
+    const showing=filteredLps.length+snoozedFromDay.length;
+    const filterNote=filters?` · ${showing} shown`:'';
+
+    return`<div class="card" style="padding:12px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:500">${fmt(d.date)}${isProtected}</div>
+        <div style="font-size:11px;color:var(--gray-400)">${totalPts} pt${totalPts!==1?'s':''} · ${rated} rated${snoozedCount?` · ${snoozedCount} snoozed`:''}${filterNote}</div>
+      </div>
+      <div>${rows}${snoozedRows}</div>
+    </div>`;
+  }).join('');
+
+  // Excluded LPs card
+  let excludedCard='';
+  if((state.excludedIds||[]).length>0){
+    const excludedLps=state.allLPs.filter(l=>(state.excludedIds||[]).includes(l.id));
+    const filteredExcluded=!filters?excludedLps:excludedLps.filter(lp=>filters.includes(getMastery(lp.id)));
+    if(filteredExcluded.length||!filters){
+      const rows=filteredExcluded.map(lp=>`<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--gray-100)">
+        <div style="flex:1;font-size:12px;color:var(--gray-700);line-height:1.45">${lp.text}</div>
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:5px;white-space:nowrap">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--green)"></div>
+          <span style="font-size:11px;color:var(--green-dark)">Excluded</span>
+        </div>
+      </div>`).join('');
+      excludedCard=`<div class="card" style="padding:12px 16px;margin-bottom:10px;border-color:var(--gray-200)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:500;color:var(--gray-500)">Excluded — pre-completed</div>
+          <div style="font-size:11px;color:var(--gray-400)">${excludedLps.length} pt${excludedLps.length!==1?'s':''}</div>
+        </div>
+        <div>${rows}</div>
+      </div>`;
+    }
+  }
+
+  return filterBar+excludedCard+cards;
+}
+
+function renderSched(){
+  const today=dsNow();
+  const rows=state.days.map(d=>{
+    let dc='#d1d5db',badge='',cnt='';
+    const snoozedCount=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===d.date;}).length;
+    const amberDot=snoozedCount>0?`<div style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-left:4px" title="${snoozedCount} returning LP${snoozedCount!==1?'s':''}"></div>`:'';
+    if(d.isProtected){dc='#a855f7';badge='<span class="badge" style="background:#f3e8ff;color:#7c3aed">protected</span>';cnt='no points';}
+    else if(d.isBuffer){dc='#9ca3af';badge='<span class="badge bk">buffer</span>';cnt='—';}
+    else if(d.completed){dc='#1a9e6e';badge='<span class="badge bg">done</span>';cnt=d.lps.length+' pts';}
+    else if(d.skipped){dc='#d97706';badge='<span class="badge ba">skipped</span>';}
+    else if(d.date===today){dc='#2563eb';badge='<span class="badge bb">today</span>';cnt=d.lps.length+' pts';}
+    else if(d.date<today){dc='#dc2626';badge='<span class="badge br">missed</span>';cnt=d.lps.length+' pts';}
+    else{cnt=d.lps.length+' pts';}
+    if(snoozedCount>0) cnt=(d.lps.length+snoozedCount)+' pts';
+    return`<div class="sched-row"><div class="sdot" style="background:${dc}"></div><div class="sdate">${fmt(d.date)}</div><div class="scnt" style="display:flex;align-items:center;gap:2px">${cnt}${amberDot}</div>${badge}</div>`;
+  }).join('');
+  return`<div class="card" style="padding:14px 16px">${rows}</div>`;
+}
+
+function calPeek(dateStr){
+  state.calendarPeek=state.calendarPeek===dateStr?null:dateStr;
+  save(state);rerender();
+}
+
+function renderCalendar(){
+  if(!state.days.length) return`<div class="alert info">No schedule yet.</div>`;
+  const calView=state.calendarView||'calendar';
+  const toggle=`<div style="display:flex;gap:6px;margin-bottom:14px">
+    <button onclick="state.calendarView='calendar';save(state);rerender()" style="font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid ${calView==='calendar'?'var(--gray-700)':'var(--gray-200)'};background:${calView==='calendar'?'var(--gray-900)':'#fff'};color:${calView==='calendar'?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit;font-weight:${calView==='calendar'?'500':'400'}">Calendar</button>
+    <button onclick="state.calendarView='schedule';save(state);rerender()" style="font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid ${calView==='schedule'?'var(--gray-700)':'var(--gray-200)'};background:${calView==='schedule'?'var(--gray-900)':'#fff'};color:${calView==='schedule'?'#fff':'var(--gray-500)'};cursor:pointer;font-family:inherit;font-weight:${calView==='schedule'?'500':'400'}">Schedule</button>
+  </div>`;
+
+  if(calView==='schedule') return toggle+renderSched();
+  return toggle+renderCalendarGrid();
+}
+
+function renderCalendarGrid(){
+  const today=dsNow();
+  const start=pd(state.startDate);
+  const end=pd(state.deadline);
+  const dayMap={};
+  state.days.forEach(d=>dayMap[d.date]=d);
+
+  let html=`<div style="font-size:13px;color:var(--gray-500);margin-bottom:14px;line-height:1.6">
+    Tap any future scheduled day to preview its learning points and study it ahead of time. Protected days are earned by completing a day ahead and choosing "Take that day off".
+  </div>
+  <div class="legend" style="margin-bottom:16px">
+    <span><div class="ldot" style="background:#a855f7"></div>Protected</span>
+    <span><div class="ldot" style="background:var(--green)"></div>Done</span>
+    <span><div class="ldot" style="background:var(--blue)"></div>Today</span>
+    <span><div class="ldot" style="background:var(--amber)"></div>Skipped</span>
+    <span><div class="ldot" style="background:var(--green-light);border:1.5px dashed var(--green)"></div>Buffer</span>
+    <span><div class="ldot" style="background:var(--red-light);border:1.5px solid var(--red)"></div>Deadline</span>
+    <span><div class="ldot" style="background:var(--gray-200)"></div>Scheduled</span>
+  </div>`;
+
+  let cur=new Date(start.getFullYear(),start.getMonth(),1);
+  const endMonth=new Date(end.getFullYear(),end.getMonth(),1);
+
+  while(cur<=endMonth){
+    const year=cur.getFullYear(),month=cur.getMonth();
+    const monthName=cur.toLocaleDateString('en-AU',{month:'long',year:'numeric'});
+    const firstDow=(new Date(year,month,1).getDay()+6)%7;
+    const daysInMonth=new Date(year,month+1,0).getDate();
+
+    let grid=`<div class="card" style="margin-bottom:14px">
+      <div class="card-title">${monthName}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">`;
+
+    ['M','T','W','T','F','S','S'].forEach(h=>{
+      grid+=`<div style="font-size:10px;color:var(--gray-400);padding:2px 0;font-weight:500">${h}</div>`;
+    });
+
+    for(let i=0;i<firstDow;i++) grid+=`<div></div>`;
+
+    for(let day=1;day<=daysInMonth;day++){
+      const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const d=dayMap[dateStr];
+      const isToday=dateStr===today;
+      const isPast=dateStr<today;
+      const inRange=dateStr>=state.startDate&&dateStr<=state.deadline;
+      const inRangeOrToday=inRange||isToday;
+
+      let bg='transparent',color='var(--gray-300)',border='none',title='';
+      const isFuture=dateStr>today;
+      const snoozedCount=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===dateStr;}).length;
+      const totalCount=isToday?(d?d.lps.length+snoozedCount:0):activeLpCount(d)+snoozedCount;
+
+      if(!inRange){
+        bg='transparent';color='var(--gray-200)';
+      } else if(d&&d.isProtected){
+        bg='#f3e8ff';color='#7c3aed';title='Protected';
+      } else if(d){
+        if(d.completed){bg='var(--green-light)';color='var(--green-dark)';title='Done';}
+        else if(d.isBuffer){bg='var(--green-light)';color='var(--green-dark)';border='1.5px dashed var(--green)';title='Buffer';}
+        else if(d.skipped){bg='var(--amber-light)';color='var(--amber-dark)';title='Skipped';}
+        else{bg='var(--gray-100)';color='var(--gray-700)';title=d.lps.length+' pts';}
+      } else if(inRange){
+        bg='var(--gray-100)';color='var(--gray-400)';
+      }
+
+      if(isToday&&!(d&&d.skipped)){
+        if(d&&d.completed){bg='var(--green-light)';color='var(--green-dark)';border='2px solid var(--green)';}
+        else{bg='var(--blue-light)';color='var(--blue)';border='2px solid var(--blue)';}
+      }
+      if(dateStr===state.deadline&&!isToday&&!(d&&d.skipped)){bg='var(--red-light)';color='var(--red-dark)';border='2px solid var(--red)';}
+      // Days with returning LPs show as grey scheduled regardless of completed status
+      if(snoozedCount>0&&!isToday&&dateStr!==state.deadline){bg='var(--gray-100)';color='var(--gray-700)';border='none';}
+      const showCount=(inRangeOrToday&&!d?.isBuffer&&totalCount>0)||(isToday&&d&&d.lps.length>0);
+      const showAmberDot=inRange&&snoozedCount>0&&!showCount;
+      const isClickable=isToday||(inRangeOrToday&&!d?.isBuffer&&(totalCount>0||d?.isProtected||d?.completed||d?.skipped));
+      const isPeeked=state.calendarPeek===dateStr;
+
+      if(isPeeked){border='2px solid var(--gray-700)';}
+
+      grid+=`<div onclick="${isClickable?`calPeek('${dateStr}')`:''}" title="${title}" style="aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:50%;background:${bg};color:${color};font-size:12px;border:${border};font-weight:${isToday?'500':'400'};cursor:${isClickable?'pointer':'default'};gap:1px">
+        <span>${day}</span>
+        ${showCount?`<span style="font-size:8px;line-height:1;display:flex;align-items:center;gap:2px;opacity:.85">${isToday&&d?d.lps.length:totalCount}${snoozedCount>0?`<span style="width:4px;height:4px;border-radius:50%;background:#f59e0b;display:inline-block;flex-shrink:0"></span>`:''}</span>`:showAmberDot?`<span style="width:4px;height:4px;border-radius:50%;background:#f59e0b;display:inline-block"></span>`:''}
+      </div>`;
+    }
+
+    grid+=`</div>`;
+
+    // Peek panel — shows inside this month's card if selected date is in this month
+    if(state.calendarPeek){
+      const pk=state.calendarPeek;
+      const pkYear=parseInt(pk.slice(0,4)),pkMonth=parseInt(pk.slice(5,7))-1;
+      if(pkYear===year&&pkMonth===month){
+        const pkDay=dayMap[pk];
+        const scheduledLps=(pkDay&&pkDay.lps?pkDay.lps:[]).filter(lp=>{
+          const s=state.snoozed&&state.snoozed[lp.id];
+          if(!s) return true;
+          const returnDate=typeof s==='string'?s:s.returnDate;
+          return returnDate<=pk; // hide LPs snoozed away to future dates
+        });
+        const isProtectedDay=pkDay&&pkDay.isProtected;
+        // IDs of LPs snoozed to return on this date
+        const snoozedIds=new Set(
+          Object.entries(state.snoozed||{})
+            .filter(([,s])=>{const r=typeof s==='string'?s:s.returnDate;return r===pk;})
+            .map(([idStr])=>parseInt(idStr))
+        );
+        const returningLps=[...snoozedIds].map(id=>state.allLPs.find(l=>l.id===id)).filter(Boolean);
+        const allLps=[...scheduledLps,...returningLps.filter(rl=>!scheduledLps.find(l=>l.id===rl.id))];
+        const isPeekToday=pk===today;
+        if(allLps.length||isProtectedDay||isPeekToday){
+          const returnCount=snoozedIds.size;
+          const scheduledCount=scheduledLps.length;
+          const pkDayObj=dayMap[pk];
+          const canStudyAhead=pk>today&&pkDayObj&&!pkDayObj.completed&&!pkDayObj.isProtected&&!pkDayObj.isBuffer;
+          const protectedTag=isProtectedDay?`<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:#f3e8ff;color:#7c3aed;margin-left:6px">protected day off</span>`:'';
+          grid+=`<div style="border-top:1px solid var(--gray-100);margin-top:10px;padding-top:10px">
+            <div style="font-size:11px;font-weight:500;color:var(--gray-500);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${fmt(pk)}${scheduledCount?` · ${scheduledCount} ${pkDay&&pkDay.completed?'studied':'pts'}`:''}${returnCount?` · ${returnCount} returning`:''}${protectedTag}</div>
+            ${allLps.length?allLps.map(lp=>{
+              const isReturning=snoozedIds.has(lp.id);
+              const isDone=pkDay&&pkDay.completed&&!isReturning;
+              const tag=isReturning?`<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:8px;background:var(--amber-light);color:var(--amber-dark);vertical-align:middle;margin-left:5px">&#128337; returning</span>`:'';
+              const style=isDone?'color:var(--gray-400);font-style:italic':'color:var(--gray-700)';
+              return`<div style="font-size:12px;${style};padding:5px 0;border-bottom:1px solid var(--gray-100);line-height:1.4">${lp.text}${tag}</div>`;
+            }).join(''):`<div style="font-size:12px;color:var(--gray-400);padding:5px 0;font-style:italic">Earned day off — no points scheduled</div>`}
+            <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+              ${canStudyAhead?`<button class="btn primary sm" onclick="state.calendarPeek=null;save(state);startStudyAhead('${pk}',true)">Study this day now →</button>`:'<span></span>'}
+              <span onclick="state.calendarPeek=null;save(state);rerender()" style="font-size:11px;color:var(--gray-400);cursor:pointer;text-decoration:underline">close</span>
+            </div>
+            ${state.debugMode?`<details style="margin-top:10px"><summary style="font-size:10px;color:var(--gray-400);cursor:pointer">Debug</summary><pre style="font-size:10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:4px;padding:8px;margin-top:6px;overflow-x:auto;white-space:pre-wrap">${JSON.stringify({date:pk,completed:pkDay?.completed,isProtected:pkDay?.isProtected,lpCount:pkDay?.lps?.length,snoozedIds:[...snoozedIds],activeLpCount:activeLpCount(pkDay)},null,2)}</pre></details>`:''}
+          </div>`;
+        }
+      }
+    }
+
+    grid+=`</div>`;
+    html+=grid;
+    cur=new Date(year,month+1,1);
+  }
+
+  const protectedDays=state.days.filter(d=>d.isProtected).sort((a,b)=>a.date.localeCompare(b.date));
+  if(protectedDays.length){
+    html+=`<div class="card"><div class="card-title">Protected days (${protectedDays.length})</div>
+      ${protectedDays.map(d=>`<div class="sched-row">
+        <div class="sdot" style="background:#a855f7"></div>
+        <div class="sdate">${fmt(d.date)}</div>
+        <div class="scnt" style="color:var(--gray-400)">Earned day off — studied ahead</div>
+        <span class="badge" style="background:#f3e8ff;color:#7c3aed">protected</span>
+      </div>`).join('')}
+    </div>`;
+  } else {
+    html+=`<div class="alert info">No protected days yet — complete a day ahead and choose "Take that day off" to earn one.</div>`;
+  }
+
+  return html;
+}
+
+function renderSettings(){
+  const te=addDays(pd(state.deadline),-state.bufferDays-1);
+  const owl=state.nightOwlHours||0;
+  const debugOn=state.debugMode||false;
+
+  let debugPanel='';
+  if(debugOn){
+    try{
+      const preBlock=(label,content,open)=>{
+        const sum=`<summary style="font-size:11px;font-weight:500;color:var(--gray-600);text-transform:uppercase;letter-spacing:.05em;cursor:pointer;padding:6px 0;user-select:none">${label}</summary>`;
+        const pre=`<pre onclick="navigator.clipboard.writeText(this.textContent).then(()=>{this.style.outline='2px solid var(--green)';setTimeout(()=>this.style.outline='',800)})" title="Tap to copy" style="font-size:11px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:4px;padding:10px;overflow-x:auto;cursor:pointer;white-space:pre-wrap;max-height:260px;overflow-y:auto;margin-top:6px">${content}</pre>`;
+        return `<details style="margin-bottom:8px"${open?' open':''}>${sum}${pre}</details>`;
+      };
+
+      const streak=(()=>{let s=0,c=pd(dsNow());while(true){const d=state.days.find(d=>d.date===ds(c));if(d&&(d.completed||d.isProtected)){s++;c=addDays(c,-1);}else break;}return s;})();
+
+      const sessionInfo=JSON.stringify({
+        today:dsNow(),startDate:state.startDate,deadline:state.deadline,
+        bufferDays:state.bufferDays,nightOwlHours:state.nightOwlHours||0,
+        aheadDate:state.aheadDate||null,lastAheadDate:state.lastAheadDate||null,
+        calendarSessionDate:state.calendarSessionDate||null,
+        pendingResolve:state.pendingResolve||false,resolveShowWarning:state.resolveShowWarning||false,
+        resolvedAhead:state.resolvedAhead||false,streak
+      },null,2);
+
+      const schedInfo=JSON.stringify({
+        lpOrder:Array.isArray(state.lpOrder)?'custom:'+state.lpOrder.join(','):state.lpOrder||'random',
+        complexityMode:state.complexityMode||false,
+        excludedIds:(state.excludedIds||[]).length+' excluded: ['+(state.excludedIds||[]).join(', ')+']',
+        totalLPs:state.allLPs.length,
+        scheduledDays:state.days.filter(d=>!d.isBuffer).length,
+        bufferDays:state.days.filter(d=>d.isBuffer).length,
+        completedDays:state.days.filter(d=>d.completed).length,
+        deadlineDate:state.deadline,
+        targetFinish:ds(addDays(pd(state.deadline),-state.bufferDays-1)),
+      },null,2);
+
+      const notesInfo=(()=>{
+        const notes=state.notes||{};
+        const ids=Object.keys(notes).filter(id=>{const n=notes[id];return n&&(n.text||(n.images&&n.images.length));});
+        const withImages=ids.filter(id=>notes[id].images&&notes[id].images.length);
+        const totalImages=ids.reduce((s,id)=>s+(notes[id].images||[]).length,0);
+        const byTopic={};
+        ids.forEach(id=>{const lp=state.allLPs.find(l=>l.id===parseInt(id));if(lp){byTopic[lp.topic]=(byTopic[lp.topic]||0)+1;}});
+        return JSON.stringify({
+          totalNotes:ids.length,
+          withImages:withImages.length,
+          totalImages,
+          byTopic:Object.fromEntries(Object.entries(byTopic).map(([t,c])=>['T'+t,c])),
+          printSettings:{
+            topics:state.notesPrintTopics||[1,2,3,4,5,6],
+            mastery:state.notesPrintMastery||[0,1,2,3],
+            sort:state.notesPrintSort||'topic',
+            images:state.notesPrintImages!==false,
+          }
+        },null,2);
+      })();
+
+      const integrityInfo=(()=>{
+        const accounted=new Set();
+        state.days.filter(d=>d.completed).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+        state.days.filter(d=>!d.completed&&!d.isBuffer).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+        Object.keys(state.snoozed||{}).map(Number).forEach(id=>accounted.add(id));
+        (state.excludedIds||[]).forEach(id=>accounted.add(id));
+        const missing=state.allLPs.filter(l=>!accounted.has(l.id)).map(l=>'LP#'+l.id+' T'+l.topic+': '+l.text.slice(0,50));
+        const dupes=[];
+        const seen=new Set();
+        state.days.flatMap(d=>d.lps).forEach(l=>{if(seen.has(l.id))dupes.push('LP#'+l.id);seen.add(l.id);});
+        return 'missing ('+missing.length+'): '+(missing.join(', ')||'none')+'\nduplicates ('+dupes.length+'): '+(dupes.join(', ')||'none');
+      })();
+
+      const snoozedInfo=Object.entries(state.snoozed||{}).map(([id,s])=>{
+        const r=typeof s==='string'?s:s.returnDate;
+        const f=typeof s==='object'?s.fromDate:'?';
+        const lp=state.allLPs.find(l=>l.id===parseInt(id));
+        const expired=r<=dsNow()?'⚠️ EXPIRED':'';
+        return 'LP#'+id+' '+expired+'\n  from: '+f+'\n  return: '+r+'\n  text: '+(lp?lp.text.slice(0,70)+'...':'unknown');
+      }).join('\n\n')||'none';
+
+      const daysInfo=state.days.map(d=>{
+        const ret=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===d.date;}).length;
+        const flags=[
+          d.completed?'DONE':'',d.isProtected?'PROT':'',d.isBuffer?'BUF':'',
+          d.skipped?'SKIP':'',d.calendarStudy?'CAL':'',d.isFreeDay?'FREE':'',
+          ret>0?'RET:'+ret:''
+        ].filter(Boolean).join(' ');
+        return d.date+'  lps:'+d.lps.length+'  active:'+activeLpCount(d)+'  '+(flags||'scheduled');
+      }).join('\n');
+
+      const m=state.mastery||{};
+      const mc={0:0,1:0,2:0,3:0};
+      Object.values(m).forEach(v=>mc[v]=(mc[v]||0)+1);
+      const doneLPIds=new Set(state.days.filter(d=>d.completed).flatMap(d=>d.lps.map(l=>l.id)));
+      const unratedDone=[...doneLPIds].filter(id=>!m[id]||m[id]===0).length;
+      const masteryInfo='confident:'+mc[3]+'  getting-there:'+mc[2]+'  needs-work:'+mc[1]+'  unrated:'+mc[0]+'\ndone-but-unrated: '+unratedDone;
+
+      const doneDays=state.days.filter(d=>d.completed);
+      const topicsInfo=TNAMES.map((name,i)=>{
+        const t=i+1;
+        const total=state.allLPs.filter(l=>l.topic===t).length;
+        const done=doneDays.flatMap(d=>d.lps).filter(l=>l.topic===t).length;
+        const excl=(state.excludedIds||[]).filter(id=>state.allLPs.find(l=>l.id===id&&l.topic===t)).length;
+        return 'T'+t+': '+done+'/'+total+(excl?' ('+excl+' excl)':'');
+      }).join('\n');
+
+      const protInfo=state.days.filter(d=>d.isProtected).map(d=>
+        d.date+'  lps:'+d.lps.length+'  completed:'+d.completed+'  calStudy:'+!!d.calendarStudy
+      ).join('\n')||'none';
+
+      debugPanel=`<div class="card" style="font-family:monospace">
+        <div class="card-title" style="margin-bottom:4px">Debug</div>
+        <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px">Tap any block to copy. Green flash = copied.</div>
+        ${preBlock('Session state ('+dsNow()+')', sessionInfo, true)}
+        ${preBlock('Schedule & settings', schedInfo, false)}
+        ${preBlock('LP integrity check', integrityInfo, false)}
+        ${preBlock('Notes ('+Object.keys(state.notes||{}).filter(id=>{const n=(state.notes||{})[id];return n&&(n.text||(n.images&&n.images.length));}).length+')', notesInfo, false)}
+        ${preBlock('Snoozed LPs ('+Object.keys(state.snoozed||{}).length+') — queue: ['+([...pendingSnoozed].join(', ')||'empty')+']', snoozedInfo, false)}
+        ${preBlock('Days ('+state.days.length+' total)', daysInfo, false)}
+        ${preBlock('Mastery ('+Object.keys(m).length+' rated)', masteryInfo, false)}
+        ${preBlock('LP counts by topic', topicsInfo, false)}
+        ${preBlock('Protected days', protInfo, false)}
+        ${preBlock('Raw state (full)', JSON.stringify(state,null,2), false)}
+      </div>`;
+    }catch(e){
+      debugPanel=`<div class="card"><div style="color:var(--red);font-size:12px;font-family:monospace">Debug error: ${e.message}</div></div>`;
+    }
+  }
+
+  return`<div class="card"><div class="card-title">Deadline</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Change your exam or submission deadline. This will redistribute your remaining learning points across the updated schedule.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <input type="date" id="dlInput" value="${state.deadline}" oninput="updDeadline()"/>
+    </div>
+    <div id="dlInfo" style="font-size:12px;color:var(--gray-400);margin-bottom:10px">${fmt(state.deadline)}</div>
+    <button id="applyDlBtn" class="btn sm" onclick="applyDeadline()" style="display:none">Apply changes</button>
+  </div>
+  <div class="card"><div class="card-title">Buffer days</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Finish this many days before the deadline. Changing this will redistribute your remaining learning points.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <input type="number" id="be" value="${state.bufferDays}" min="0" max="90" style="width:80px" oninput="updBuf()"/>
+      <span style="font-size:13px;color:var(--gray-500)">days before deadline</span>
+    </div>
+    <div id="bi" style="font-size:12px;color:var(--gray-400);margin-bottom:10px">Target finish: ${fmt(ds(te))}</div>
+    <button id="applyBufBtn" class="btn sm" onclick="applyBuf()" style="display:none">Apply changes</button>
+  </div>
+  <div class="card"><div class="card-title">Complexity-weighted scheduling</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Distributes learning points so each day has a similar total complexity score, rather than an equal number of LPs. Days won't have identical LP counts, but the cognitive load will be more even.</div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray-600)">
+      <input type="checkbox" ${state.complexityMode?'checked':''} onchange="
+        if(!confirm('Changing this setting will redistribute your remaining learning points and reset the current schedule. Completed days are preserved. Continue?')){this.checked=!this.checked;return;}
+        state.complexityMode=this.checked;
+        recalc(state);save(state);rerender();
+      "/>
+      Enable complexity-weighted scheduling
+    </label>
+    ${state.complexityMode?`<div style="font-size:12px;color:var(--gray-400);margin-top:8px">Active — schedule redistributed by complexity. Total: 226 pts across ${state.allLPs.length} LPs, avg ${(226/state.allLPs.length).toFixed(1)} per LP.</div>`:''}
+  </div>
+  <div class="card"><div class="card-title">New day starts after</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Set to the latest time you think you'll be studying. If you study past midnight, today's session won't roll over until then.</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <input type="number" id="nowl" value="${owl}" min="0" max="6" style="width:60px" oninput="updOwl()"/>
+      <span style="font-size:13px;color:var(--gray-500)">hours past midnight</span>
+    </div>
+    <div style="font-size:12px;color:var(--gray-400);margin-bottom:10px" id="owlDesc">${owl===0?'New day starts at midnight (default)':`New day starts at ${owl}:00 AM`}</div>
+    <button id="applyOwlBtn" class="btn sm" onclick="applyOwl()" style="display:none">Apply changes</button>
+  </div>
+  <div class="card"><div class="card-title">Debug</div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray-600)">
+      <input type="checkbox" ${debugOn?'checked':''} onchange="state.debugMode=this.checked;save(state);rerender()"/>
+      Show debug panel
+    </label>
+    ${debugOn?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-100)">
+      <div style="font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:4px">Simulate date</div>
+      <div style="font-size:11px;color:var(--red-dark);margin-bottom:10px">⚠ For testing only. This affects all date-dependent behaviour.</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn sm" onclick="
+          const cur=_dateOverride||ds(new Date());
+          _dateOverride=ds(addDays(pd(cur),-1));
+          document.getElementById('date-override').value=_dateOverride;
+          applyDayChange();sw('Dashboard');
+        " style="padding:5px 10px">&lt;</button>
+        <input type="date" id="date-override" value="${_dateOverride||ds(new Date())}" style="font-size:12px;padding:4px 6px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;width:130px"/>
+        <button class="btn sm" onclick="
+          const cur=_dateOverride||ds(new Date());
+          _dateOverride=ds(addDays(pd(cur),1));
+          document.getElementById('date-override').value=_dateOverride;
+          applyDayChange();sw('Dashboard');
+        " style="padding:5px 10px">&gt;</button>
+        <button class="btn sm" onclick="_dateOverride=document.getElementById('date-override').value||null;applyDayChange();sw('Dashboard')">Apply</button>
+        <button class="btn sm" onclick="_dateOverride=null;applyDayChange();sw('Dashboard')">Reset</button>
+      </div>
+      ${_dateOverride?`<div style="font-size:11px;color:var(--amber-dark);margin-top:6px">⚠ Overridden to ${_dateOverride}</div>`:''}
+    </div>`:''}
+  </div>
+  ${debugPanel}
+  <div class="card"><div class="card-title">Export & import</div>
+    <div style="font-size:13px;color:var(--gray-500);margin-bottom:14px;line-height:1.6">Export your full progress to a file. Import it on any device to resume exactly where you left off — schedule, history, notes, and all ratings.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button class="btn primary" onclick="exportProgress()">⬇ Export progress</button>
+      <label style="cursor:pointer">
+        <input type="file" accept=".json" onchange="importProgress(this)" style="display:none"/>
+        <span class="btn" style="display:inline-flex;align-items:center">⬆ Import progress</span>
+      </label>
+    </div>
+    <div style="border-top:1px solid var(--gray-100);padding-top:14px;margin-top:2px">
+      <div style="font-size:13px;font-weight:500;color:var(--gray-700);margin-bottom:6px">Notes sharing</div>
+      <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Export only your notes. Importing a notes file adds notes to matching learning points without affecting the schedule or ratings.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportNotes()">⬇ Export notes</button>
+        <label style="cursor:pointer">
+          <input type="file" accept=".json" onchange="importNotes(this)" style="display:none"/>
+          <span class="btn" style="display:inline-flex;align-items:center">⬆ Import notes</span>
+        </label>
+      </div>
+    </div>
+    <div id="import-msg" style="margin-top:10px;font-size:12px;display:none"></div>
+  </div>
+  <div class="card"><div class="card-title">About</div>
+    <div style="font-size:13px;color:var(--gray-500);line-height:1.8">
+      <div>JMP 2026 Study Planner</div>
+      <div style="font-size:12px;color:var(--gray-400)">Last updated: 19 Apr 2026</div>
+    </div>
+  </div>
+  <div class="card"><div class="card-title">Danger zone</div><button class="btn danger" onclick="resetPlan()">Reset and start over</button></div>`;
+}
+
+function exportProgress(){
+  const exportState={
+    _version:'jmp2026_v1',
+    _exportedAt:new Date().toISOString(),
+    _lpCount:state.allLPs.length,
+    // Core scheduling
+    startDate:state.startDate,
+    deadline:state.deadline,
+    bufferDays:state.bufferDays,
+    lpOrder:state.lpOrder,
+    complexityMode:state.complexityMode||false,
+    excludedIds:state.excludedIds||[],
+    // Full schedule and progress
+    allLPs:state.allLPs,
+    days:state.days,
+    // Ratings and snoozes
+    mastery:state.mastery||{},
+    snoozed:state.snoozed||{},
+    // Notes (may be large if images attached)
+    notes:state.notes||{},
+    // Streak continuity
+    todayCompletedDates:state.todayCompletedDates||[],
+    todayCompletedDatesDay:state.todayCompletedDatesDay||'',
+    // Preferences
+    nightOwlHours:state.nightOwlHours||0,
+    historyFilter:state.historyFilter||[],
+    historySort:state.historySort||'date',
+    notesSort:state.notesSort||'topic',
+    notesMastery:state.notesMastery||[],
+    topicExpanded:state.topicExpanded||[],
+  };
+  const json=JSON.stringify(exportState);
+  const sizeMb=(new Blob([json]).size/1024/1024).toFixed(2);
+  const date=dsNow().replace(/-/g,'');
+  const filename=`jmp2026_progress_${date}.json`;
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  a.download=filename;
+  a.click();
+  // Show confirmation
+  const msg=document.getElementById('import-msg');
+  if(msg){msg.style.display='';msg.style.color='var(--green-dark)';msg.textContent=`✓ Exported ${filename} (${sizeMb} MB)`;}
+}
+
+function importProgress(input){
+  const file=input.files[0];
+  if(!file) return;
+  const msg=document.getElementById('import-msg');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      // Validate
+      if(!data._version||!data.startDate||!data.deadline||!data.allLPs||!data.days){
+        throw new Error('Invalid progress file — missing required fields.');
+      }
+      if(data._version!=='jmp2026_v1'){
+        throw new Error('Incompatible file version: '+data._version);
+      }
+      if(!confirm(`Import progress from ${data._exportedAt?.slice(0,10)||'unknown date'}?\n\nThis will replace your current plan. ${data._lpCount} LPs, exported ${data._exportedAt?.slice(0,10)||''}.\n\nContinue?`)){
+        input.value='';return;
+      }
+      // Build imported state — omit transient fields
+      state={
+        startDate:data.startDate,
+        deadline:data.deadline,
+        bufferDays:data.bufferDays||0,
+        lpOrder:data.lpOrder||'random',
+        complexityMode:data.complexityMode||false,
+        excludedIds:data.excludedIds||[],
+        allLPs:data.allLPs,
+        days:data.days,
+        mastery:data.mastery||{},
+        snoozed:data.snoozed||{},
+        notes:data.notes||{},
+        todayCompletedDates:data.todayCompletedDates||[],
+        todayCompletedDatesDay:data.todayCompletedDatesDay||'',
+        nightOwlHours:data.nightOwlHours||0,
+        historyFilter:data.historyFilter||[],
+        historySort:data.historySort||'date',
+        notesSort:data.notesSort||'topic',
+        notesMastery:data.notesMastery||[],
+        topicExpanded:data.topicExpanded||[],
+        // Reset transient session state
+        aheadDate:null,
+        lastAheadDate:null,
+        calendarSessionDate:null,
+        pendingResolve:false,
+        resolveShowWarning:false,
+        resolvedAhead:false,
+        debugMode:false,
+      };
+      lpIntegrityCheck(state);
+      // Run a full day-change pass so recalc fires — this sweeps stale snoozes
+      // and detects any missed days in the imported state.
+      applyDayChange();
+      activeTab='Dashboard';
+      render();
+      window.scrollTo(0,0);
+    }catch(err){
+      if(msg){msg.style.display='';msg.style.color='var(--red-dark)';msg.textContent='✕ Import failed: '+err.message;}
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportNotesPDF(){
+  const notes=state.notes||{};
+  const TL_COLOR={0:'#9ca3af',1:'#dc2626',2:'#d97706',3:'#16a34a'};
+  const TL_LABEL={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+  const TNAMES_SHORT=['T1: Cardiovascular & Respiratory','T2: Gastroenterology & Renal','T3: Neurology, Endocrinology & Diabetes','T4: Rheumatology, Older Person\'s Health & Palliative Care','T5: Infectious Disease, Sexual Health & Dermatology','T6: Oncology & Haematology'];
+
+  const printTopics=state.notesPrintTopics||[1,2,3,4,5,6];
+  const printMastery=state.notesPrintMastery||[0,1,2,3];
+  const printImages=state.notesPrintImages!==false;
+  const printSort=state.notesPrintSort||'topic';
+
+  const noteEntries=state.allLPs.filter(lp=>{
+    const n=notes[lp.id];
+    if(!n||(!n.text&&!(n.images&&n.images.length))) return false;
+    if(!printTopics.includes(lp.topic)) return false;
+    if(!printMastery.includes(getMastery(lp.id))) return false;
+    return true;
+  });
+
+  if(!noteEntries.length){
+    const msg=document.getElementById('import-msg');
+    if(msg){msg.style.display='';msg.style.color='var(--amber-dark)';msg.textContent='No notes match the selected filters.';}
+    return;
+  }
+
+  const noteCount=noteEntries.length;
+  const topicSet=new Set(noteEntries.map(l=>l.topic));
+  const exportDate=new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+  let bodyHtml='';
+  if(printSort==='mastery'){
+    [3,2,1,0].forEach(mv=>{
+      const group=noteEntries.filter(lp=>getMastery(lp.id)===mv);
+      if(!group.length) return;
+      bodyHtml+=`<div class="topic-section"><div class="topic-heading"><span class="mastery-dot" style="background:${TL_COLOR[mv]}"></span>${TL_LABEL[mv]}</div>`;
+      group.forEach(lp=>{bodyHtml+=lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages);});
+      bodyHtml+='</div>';
+    });
+  } else {
+    TNAMES_SHORT.forEach((tname,ti)=>{
+      const t=ti+1;
+      const topicLps=noteEntries.filter(lp=>lp.topic===t);
+      if(!topicLps.length) return;
+      bodyHtml+=`<div class="topic-section"><div class="topic-heading">${tname}</div>`;
+      topicLps.forEach(lp=>{bodyHtml+=lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages);});
+      bodyHtml+='</div>';
+    });
+  }
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"/>
+  <title>JMP 2026 Study Notes</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#fff;font-family:Georgia,serif;color:#1a1a1a;padding:40px 48px;max-width:800px;margin:0 auto}
+    .page-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:24px}
+    .page-meta{font-size:11px;color:#aaa;font-family:Arial,sans-serif}
+    .topic-section{margin-bottom:24px}
+    .topic-heading{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;font-family:Arial,sans-serif;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:6px}
+    .lp-block{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f3f4f6;page-break-inside:avoid}
+    .lp-block:last-child{border-bottom:none}
+    .lp-text{font-size:12px;font-weight:700;color:#1a1a1a;line-height:1.5;margin-bottom:3px;font-family:Arial,sans-serif}
+    .lp-meta{font-size:10px;color:#aaa;margin-bottom:8px;font-family:Arial,sans-serif;display:flex;align-items:center;gap:6px}
+    .mastery-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+    .note-text{font-size:13px;color:#333;line-height:1.75;white-space:pre-wrap;font-family:Georgia,serif}
+    .img-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .img-thumb{width:calc(50% - 5px);max-width:280px;max-height:200px;object-fit:contain;border:1px solid #e5e7eb;border-radius:4px}
+    .footer{margin-top:32px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;font-size:10px;color:#bbb;font-family:Arial,sans-serif}
+    @media print{body{padding:20px 30px}.lp-block{page-break-inside:avoid}.page-header{position:running(header)}}
+  </style>
+  </head><body>
+  <div class="page-header">
+    <div class="page-meta">JMP 2026 Study Notes &nbsp;·&nbsp; Year 4 Medicine &nbsp;·&nbsp; Exported ${exportDate}</div>
+  </div>
+  ${bodyHtml}
+  <div class="footer"><span>JMP 2026 Study Planner</span><span>Exported ${exportDate} &nbsp;·&nbsp; ${noteCount} note${noteCount!==1?'s':''}</span></div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+
+  const w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+}
+
+function lpNoteHtml(lp,notes,TL_COLOR,TL_LABEL,printImages){
+  const n=notes[lp.id];
+  const m=getMastery(lp.id);
+  const imagesHtml=printImages&&n.images&&n.images.length
+    ?`<div class="img-row">${n.images.map(img=>`<img src="${img}" class="img-thumb"/>`).join('')}</div>`:'';
+  return`<div class="lp-block">
+    <div class="lp-text">${lp.text}</div>
+    <div class="lp-meta">
+      <span class="mastery-dot" style="background:${TL_COLOR[m]}"></span>
+      <span>${TL_LABEL[m]} &middot; ${COLS[lp.col]}</span>
+    </div>
+    ${n.text?`<div class="note-text">${n.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`:''}
+    ${imagesHtml}
+  </div>`;
+}
+
+function exportNotes(){
+  const notes=state.notes||{};
+  const noteCount=Object.keys(notes).filter(id=>{const n=notes[id];return n&&(n.text||(n.images&&n.images.length));}).length;
+  if(!noteCount){
+    const msg=document.getElementById('import-msg');
+    if(msg){msg.style.display='';msg.style.color='var(--amber-dark)';msg.textContent='No notes to export yet.';}
+    return;
+  }
+  const exportData={
+    _version:'jmp2026_notes_v1',
+    _exportedAt:new Date().toISOString(),
+    _noteCount:noteCount,
+    notes,
+  };
+  const json=JSON.stringify(exportData);
+  const sizeMb=(new Blob([json]).size/1024/1024).toFixed(2);
+  const date=dsNow().replace(/-/g,'');
+  const filename=`jmp2026_notes_${date}.json`;
+  const a=document.createElement('a');
+  a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+  a.download=filename;
+  a.click();
+  const msg=document.getElementById('import-msg');
+  if(msg){msg.style.display='';msg.style.color='var(--green-dark)';msg.textContent=`✓ Exported ${noteCount} note${noteCount!==1?'s':''} as ${filename} (${sizeMb} MB)`;}
+}
+
+function importNotes(input){
+  const file=input.files[0];
+  if(!file) return;
+  const msg=document.getElementById('import-msg');
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data._version||!data.notes){
+        throw new Error('Invalid notes file.');
+      }
+      if(data._version!=='jmp2026_notes_v1'){
+        throw new Error('Incompatible file version: '+data._version);
+      }
+      // Count how many match LPs in this user's plan
+      const validIds=new Set(state.allLPs.map(l=>l.id));
+      const incoming=Object.entries(data.notes).filter(([id,n])=>validIds.has(parseInt(id))&&n&&(n.text||(n.images&&n.images.length)));
+      if(!incoming.length){
+        if(msg){msg.style.display='';msg.style.color='var(--amber-dark)';msg.textContent='No matching notes found for your learning points.';}
+        input.value='';return;
+      }
+      const overwriteCount=incoming.filter(([id])=>{const n=state.notes&&state.notes[id];return n&&(n.text||(n.images&&n.images.length));}).length;
+      const confirmMsg=`Import ${incoming.length} note${incoming.length!==1?'s':''}?${overwriteCount>0?'\n\n⚠ '+overwriteCount+' of your existing note'+(overwriteCount!==1?'s':'')+' will be overwritten.':''}\n\nNotes for ${state.allLPs.length-incoming.length} LPs without incoming notes are untouched.`;
+      if(!confirm(confirmMsg)){input.value='';return;}
+      if(!state.notes) state.notes={};
+      incoming.forEach(([id,n])=>{
+        const existing=state.notes[id]||{text:'',images:[]};
+        // Merge: incoming text overwrites, images are merged (no duplicates by data URI)
+        state.notes[id]={
+          text:n.text||existing.text,
+          images:[...new Set([...(existing.images||[]),...(n.images||[])])]
+        };
+      });
+      save(state);
+      if(msg){msg.style.display='';msg.style.color='var(--green-dark)';msg.textContent=`✓ Imported ${incoming.length} note${incoming.length!==1?'s':''}. ${overwriteCount>0?overwriteCount+' overwritten.':''}`;}
+      input.value='';
+    }catch(err){
+      if(msg){msg.style.display='';msg.style.color='var(--red-dark)';msg.textContent='✕ Import failed: '+err.message;}
+    }
+  };
+  reader.readAsText(file);
+}
+
+function updOwl(){
+  const v=Math.min(6,Math.max(0,parseInt(document.getElementById('nowl').value)||0));
+  const desc=document.getElementById('owlDesc');
+  if(desc) desc.textContent=v===0?'New day starts at midnight (default)':`New day starts at ${v}:00 AM`;
+  const btn=document.getElementById('applyOwlBtn');
+  if(btn) btn.style.display=v!==(state.nightOwlHours||0)?'':'none';
+}
+function applyOwl(){
+  const v=Math.min(6,Math.max(0,parseInt(document.getElementById('nowl').value)||0));
+  if(v===state.nightOwlHours){rerender();return;}
+  if(!confirm('Applying night owl mode will affect which day "today" is considered. Continue?'))return;
+  state.nightOwlHours=v;
+  save(state);rerender();
+}
+function updDeadline(){
+  const v=document.getElementById('dlInput')?.value;
+  const info=document.getElementById('dlInfo');
+  const btn=document.getElementById('applyDlBtn');
+  if(!v){return;}
+  if(info) info.textContent=v===state.deadline?fmt(v):`${fmt(v)} — was ${fmt(state.deadline)}`;
+  if(btn) btn.style.display=v!==state.deadline?'':'none';
+}
+function applyDeadline(){
+  const v=document.getElementById('dlInput')?.value;
+  if(!v||v===state.deadline){rerender();return;}
+  const today=dsNow();
+  if(v<=today){
+    alert('Deadline must be after today.');
+    document.getElementById('dlInput').value=state.deadline;
+    return;
+  }
+  if(v<=state.startDate){
+    alert('Deadline must be after your start date ('+fmt(state.startDate)+').');
+    document.getElementById('dlInput').value=state.deadline;
+    return;
+  }
+  // Check if moving deadline earlier is drastic
+  const oldDays=diffDays(pd(today),pd(state.deadline));
+  const newDays=diffDays(pd(today),pd(v));
+  const isEarlier=v<state.deadline;
+  const msg=isEarlier
+    ?`Move deadline earlier to ${fmt(v)}? This compresses your remaining schedule — LPs will be redistributed across fewer days. Completed days are preserved.\n\nContinue?`
+    :`Move deadline later to ${fmt(v)}? LPs will be spread across more days. Completed days are preserved.\n\nContinue?`;
+  if(!confirm(msg)){document.getElementById('dlInput').value=state.deadline;return;}
+  // Clamp buffer days if needed
+  const minDays=diffDays(pd(today),pd(v))-1;
+  if(state.bufferDays>=minDays){
+    state.bufferDays=Math.max(0,minDays-1);
+    alert(`Buffer days reduced to ${state.bufferDays} to fit the new deadline.`);
+  }
+  // Clear any snoozed LPs with return dates past the new deadline
+  Object.entries(state.snoozed||{}).forEach(([id,s])=>{
+    const r=typeof s==='string'?s:s.returnDate;
+    if(r>v) delete state.snoozed[id];
+  });
+  state.deadline=v;
+  recalc(state);
+  lpIntegrityCheck(state);
+  save(state);
+  rerender();
+}
+
+function updBuf(){
+  const v=parseInt(document.getElementById('be').value)||0;
+  const te=addDays(pd(state.deadline),-v-1);
+  const bi=document.getElementById('bi');
+  if(bi) bi.textContent='Target finish: '+fmt(ds(te));
+  const btn=document.getElementById('applyBufBtn');
+  if(btn) btn.style.display=v!==state.bufferDays?'':'none';
+}
+function applyBuf(){
+  const v=parseInt(document.getElementById('be').value)||0;
+  if(v===state.bufferDays){rerender();return;}
+  if(!confirm('Changing buffer days will redistribute your remaining learning points. Completed days are preserved. Continue?'))return;
+  state.bufferDays=v;
+  recalc(state);save(state);rerender();
+}
+function resetPlan(){if(!confirm('Reset everything and start over?'))return;state=null;lpOrder='random';lpTopicOrder=[1,2,3,4,5,6];try{localStorage.removeItem('jmp2026_v3');}catch(e){}render();}
+
+(function(){
+  const s=load();
+  if(s){
+    state=s;
+    // Restore LP order into module-level variables so recalc uses the correct order
+    if(state.lpOrder){
+      lpOrder=state.lpOrder;
+      if(Array.isArray(state.lpOrder)) lpTopicOrder=state.lpOrder;
+    }
+    // Remove all isFreeDay entries that aren't isProtected
+    state.days=state.days.filter(d=>!d.isFreeDay||d.isProtected);
+    // Deduplicate by date
+    const seen={};
+    state.days=state.days.filter(d=>{
+      if(seen[d.date]) return false;
+      seen[d.date]=true;
+      return true;
+    });
+    // Detect missed days — past uncompleted study days with LPs
+    const today=dsNow();
+    const missed=state.days.filter(d=>d.date<today&&!d.completed&&!d.skipped&&!d.isBuffer&&!d.isProtected&&d.lps.length>0);
+    if(missed.length){
+      const missedLPCount=missed.reduce((sum,d)=>sum+d.lps.length,0);
+      const missedDates=missed.map(d=>fmt(d.date));
+      // Mark them as skipped so recalc redistributes their LPs
+      missed.forEach(d=>{d.skipped=true;});
+      recalc(state);
+      // Store notification to show on dashboard
+      state.missedNotice={dates:missedDates,lpCount:missedLPCount};
+    } else {
+      // Only recalc if integrity check finds missing LPs — don't reshuffle unnecessarily
+      const accounted=new Set();
+      state.days.filter(d=>d.completed).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+      state.days.filter(d=>!d.completed&&!d.isBuffer).flatMap(d=>d.lps).forEach(l=>accounted.add(l.id));
+      Object.keys(state.snoozed||{}).map(Number).forEach(id=>accounted.add(id));
+      (state.excludedIds||[]).forEach(id=>accounted.add(id));
+      const missing=state.allLPs.filter(l=>!accounted.has(l.id));
+      if(missing.length) recalc(state);
+    }
+    applyDayChange();
+    activeTab='Dashboard';
+  }
+  render();
+
+  // Precise day-change watchdog: fires when dsNow() would return a new date
+  function _scheduleDayChange(){
+    const thresholdMs=(state?.nightOwlHours||0)*3600000;
+    const now=new Date();
+    // Next day turn = next calendar midnight + night owl offset
+    const nextMidnight=new Date(now);
+    nextMidnight.setHours(24,0,0,0); // always tomorrow's midnight
+    const msUntil=nextMidnight.getTime()+thresholdMs-now.getTime();
+    setTimeout(()=>{
+      if(!state){_scheduleDayChange();return;}
+      applyDayChange();render();
+      _scheduleDayChange();
+    }, msUntil);
+  }
+  _scheduleDayChange();
+
+  let _lastKnownDay=dsNow();
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState!=='visible'||!state) return;
+    const today=dsNow();
+    if(today===_lastKnownDay){render();return;}
+    _lastKnownDay=today;
+    applyDayChange();render();
+  });
+})();
