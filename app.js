@@ -1359,18 +1359,17 @@ function openNoteImage(src){
   document.body.appendChild(overlay);
 }
 
+function getARAssignments(){
+  // Pinned to all non-buffer, non-skipped days (including completed) so assignments don't shift as days are completed.
+  const days=state.days.filter(d=>!d.isBuffer&&!d.skipped).map(d=>d.date);
+  if(!days.length) return [];
+  const interval=Math.max(1,Math.floor(days.length/ADDITIONAL.length));
+  return ADDITIONAL.map((_,i)=>days[Math.min(i*interval,days.length-1)]);
+}
+
 function getAdditionalReadingsForDay(dateStr){
-  // Only assign to incomplete future study days so readings appear alongside upcoming sessions
-  const studyDays=state.days.filter(d=>!d.isBuffer&&!d.skipped&&!d.completed&&d.date>=dsNow()).map(d=>d.date).sort();
-  if(!studyDays.length) return [];
-  const n=ADDITIONAL.length,total=studyDays.length;
-  const interval=Math.max(1,Math.floor(total/n));
-  const result=[];
-  ADDITIONAL.forEach((ar,i)=>{
-    const assignedDate=studyDays[Math.min(i*interval,total-1)];
-    if(assignedDate===dateStr) result.push(ar);
-  });
-  return result;
+  const assignments=getARAssignments();
+  return ADDITIONAL.filter((_,i)=>assignments[i]===dateStr);
 }
 
 function activeLpCount(day){
@@ -1597,25 +1596,9 @@ function renderProgress(){
   }).join('');
   // Additional readings progress — a reading is seen when its assigned day is completed
   const totalAR=ADDITIONAL.length;
-  const allDays=state.days.filter(d=>!d.isBuffer&&!d.skipped).map(d=>d.date).sort();
   const completedDates=new Set(state.days.filter(d=>d.completed).map(d=>d.date));
-  let seenAR=0;
-  if(allDays.length){
-    const interval=Math.max(1,Math.floor(allDays.length/totalAR));
-    ADDITIONAL.forEach((_,i)=>{
-      const assignedDate=allDays[Math.min(i*interval,allDays.length-1)];
-      if(completedDates.has(assignedDate)) seenAR++;
-    });
-  }
-  // Build assigned date per additional reading
-  const arAssignments=[];
-  if(allDays.length){
-    const interval=Math.max(1,Math.floor(allDays.length/totalAR));
-    ADDITIONAL.forEach((_,i)=>{
-      const assignedDate=allDays[Math.min(i*interval,allDays.length-1)];
-      arAssignments.push(assignedDate);
-    });
-  }
+  const arAssignments=getARAssignments();
+  const seenAR=arAssignments.filter(date=>completedDates.has(date)).length;
 
   const arPct=Math.round(seenAR/totalAR*100);
   const arBar=`<div class="pbar-wrap" style="height:8px"><div style="width:${arPct}%;height:100%;background:var(--amber);border-radius:4px;transition:width .4s"></div></div>`;
