@@ -22,7 +22,7 @@ const RAW=[
 [1,"HSE","Identify risk factors for Rheumatic Heart Disease; justify rationale for NSW RHD Register.",[["NSW RHD Register — RHD Australia","https://www.rhdaustralia.org.au/new-south-wales"]]],
 [1,"HSE","Evaluate use of antibiotic prophylaxis for infective endocarditis.",[["AIMED — Choosing Wisely 2015: Antibiotic prophylaxis for infective endocarditis","https://aimed.net.au/2015/09/14/choosing-wisely-antibiotic-prophylaxis-for-prevention-of-infective-endocarditis/"]]],
 [1,"HSE","Evaluate global impact of TB, growing drug resistance, and link between TB and HIV.",[["WHO Fact Sheet 2018 — Tuberculosis","https://www.who.int/news-room/fact-sheets/detail/tuberculosis"]]],
-[1,"HSE","Evaluate role of newborn screening, sweat testing, CFTR genetic testing and pulmonary function testing in cystic fibrosis.",[["Cystic Fibrosis Australia — Diagnosis","https://www.cysticfibrosis.org.au/diagnosis/"]]],
+[1,"SS","Evaluate role of newborn screening, sweat testing, CFTR genetic testing and pulmonary function testing in cystic fibrosis.",[["Cystic Fibrosis Australia — Diagnosis","https://www.cysticfibrosis.org.au/diagnosis/"]]],
 [1,"PD","Justify why investigations should be rationalised for a patient presenting with palpitations.",[["Ling, Medicine Today 2015 — Clinical investigations from the RACP","https://medicinetoday.com.au/sites/default/files/cpd/MT2015-10-043-LING.pdf"]]],
 [1,"PD","Demonstrate how to communicate implications of a new OSA diagnosis to a truck driver (fitness-to-drive context).",[["Austroads AP-G56-17 — Fitness to drive","https://austroads.com.au/publications/assessing-fitness-to-drive/ap-g56/roles-and-responsibilities"]]],
 [2,"CP","Evaluate clinical presentation, common triggers, red flag features, investigations and management of GORD, H. pylori infection and dyspepsia; differentiate based on clinical/investigative findings.",[["NPS Medicinewise — Managing GORD with PPIs","https://www.nps.org.au/professionals/managing-gord-with-ppis-in-primary-care"],["NPS Medicinewise — Functional dyspepsia","https://www.nps.org.au/australian-prescriber/articles/functional-dyspepsia"]]],
@@ -43,7 +43,7 @@ const RAW=[
 [2,"SS","Assess patient's stool using the Bristol Stool Chart.",[["Continence Foundation of Australia — Bristol Stool Chart","https://www.continence.org.au/pages/bristol-stool-chart.html"]]],
 [2,"SS","Calculate and interpret the adapted Rockall Score.",[["MDCalc — Rockall Score for Upper GI Bleeding","https://www.mdcalc.com/rockall-score-upper-gi-bleeding-pre-endoscopy"]]],
 [2,"SS","Interpret Hepatitis B and C serology and explain results to a patient.",[["ASHM 2015 — Decision making in HBV","https://ashm.org.au/products/product/1976963402"]]],
-[2,"SS","Draw and label an algorithm flow chart of a kidney health check.",[["Kidney Health Australia — CKD detection algorithm 2021","https://kidney.org.au/uploads/resources/Algorithm-for-initial-detection-of-CKD_2021_logo.pdf"]]],
+[2,"HSE","Draw and label an algorithm flow chart of a kidney health check.",[["Kidney Health Australia — CKD detection algorithm 2021","https://kidney.org.au/uploads/resources/Algorithm-for-initial-detection-of-CKD_2021_logo.pdf"]]],
 [2,"HSE","Evaluate the Australian bowel cancer screening program for asymptomatic patients and barriers to uptake; define appropriate actions if FOBT is positive.",[["Cancer Council Australia — Colorectal cancer screening guidelines 2017","https://wiki.cancer.org.au/australia/Guidelines:Colorectal_cancer/Population_screening_recommendations"]]],
 [2,"HSE","Describe how Hepatitis C can be eradicated in Australia; explain how barriers to accessing treatment have been addressed.",[["Kwon, Journal of Viral Hepatitis 2018 — HCV eradication in Australia","https://onlinelibrary.wiley.com/doi/epdf/10.1111/jvh.13013"]]],
 [2,"PD","Formulate strategies for communicating, displaying and delivering information about a medical condition to suit varying levels of health literacy.",[["GESA — Patient information resources","https://www.gesa.org.au/education/patient-resources/"]]],
@@ -91,16 +91,16 @@ const RAW=[
 [5,"CP","Analyse infectious aetiologies of sudden-onset diarrhoea with fever and abdominal pain; differentiate viral, bacterial and parasitic causes; compare clinical features, investigation and management; identify complications and red flag features.",[["HNE Healthpathways — Infectious gastroenteritis control: testing guide","https://hne.communityhealthpathways.org/files/Resources/Infectious%20Gastroenteritis%20Testing%20Guide.pdf"]]],
 [5,"CP","Define and distinguish fever of unknown origin from other febrile syndromes; describe common causes and clinical features; formulate appropriate initial investigation plan.",[]],
 [5,"CP","Evaluate clinical features, routes of transmission, risk factors and complications of respiratory viruses (COVID-19 and influenza A); interpret investigations in context of disease severity.",[["Jones, Cochrane Database 2012 — Antiviral therapy and public health interventions for influenza","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6464969/"]]],
-[5,"CP","Develop evidence-based management plan including antiviral therapy, supportive care and public health interventions (vaccination, isolation protocols).",[]],
-[5,"CP","Assess patients with infectious diarrhoea: identify red flag features indicating severe or complicated disease including systemic involvement and dehydration.",[]],
+[5,"SS","Develop evidence-based management plan including antiviral therapy, supportive care and public health interventions (vaccination, isolation protocols).",[]],
+[5,"SS","Assess patients with infectious diarrhoea: identify red flag features indicating severe or complicated disease including systemic involvement and dehydration.",[]],
 [5,"CP","Analyse clinical features and underlying causes of recurrent or unusually severe infections in adults; evaluate appropriate investigations.",[]],
 [5,"CP","List and justify indications for HIV testing; describe clinical features of acute retroviral syndrome; categorise common opportunistic infections in HIV with low CD4 count.",[["ASHM 2015 — Decision making in PrEP – NSW","https://ashm.org.au/products/product/3000555592"]]],
-[5,"CP","Explain role and mechanism of PrEP and PEP; outline indications; discuss importance of patient education and opportunistic STI screening.",[["ASHM 2017 — Informed consent for HIV testing","http://testingportal.ashm.org.au/hiv/informed-consent-for-testing"],["NSW Health — STI/HIV Testing Tool 2017","https://aci.health.nsw.gov.au/__data/assets/pdf_file/0009/286857/STI-HIV-Testing-Tool-online.pdf"]]],
+[5,"SS","Explain role and mechanism of PrEP and PEP; outline indications; discuss importance of patient education and opportunistic STI screening.",[["ASHM 2015 — Decision making in PrEP – NSW","https://ashm.org.au/products/product/3000555592"],["ASHM 2017 — Informed consent for HIV testing","http://testingportal.ashm.org.au/hiv/informed-consent-for-testing"],["NSW Health — STI/HIV Testing Tool","https://aci.health.nsw.gov.au/__data/assets/pdf_file/0009/286857/STI-HIV-Testing-Tool-online.pdf"]]],
 [5,"CP","Analyse clinical features and underlying causes of abnormal skin pigmentation and dermal plaques; evaluate and prioritise appropriate investigations.",[["NEJM 2013 — How to perform a punch biopsy of the skin","https://www.nejm.org/doi/full/10.1056/NEJMvcm1105849"]]],
 [5,"CP","Identify dermatological conditions associated with systemic disease; describe skin conditions associated with malignancy; describe management of non-resectable or metastatic melanomatous and non-melanomatous skin cancers.",[]],
 [5,"SS","Prioritise investigations for infectious gastroenteritis.",[["HNE Healthpathways — Infectious gastroenteritis testing guide","https://hne.communityhealthpathways.org/files/Resources/Infectious%20Gastroenteritis%20Testing%20Guide.pdf"]]],
 [5,"SS","Understand indications, contraindications and complications in performing a skin biopsy.",[["NEJM 2013 — How to perform a punch biopsy of the skin","https://www.nejm.org/doi/full/10.1056/NEJMvcm1105849"]]],
-[5,"SS","Describe pathophysiology for hypersensitivity reactions; outline investigation of suspected allergy and principles of desensitisation; understand role of genetic testing in drug reactions.",[["RACGP AFP 2013 — Adverse drug reactions","https://www.racgp.org.au/afp/2013/january-february/adverse-drug-reactions"]]],
+[5,"PD","Describe pathophysiology for hypersensitivity reactions; outline investigation of suspected allergy and principles of desensitisation; understand role of genetic testing in drug reactions.",[["RACGP AFP 2013 — Adverse drug reactions","https://www.racgp.org.au/afp/2013/january-february/adverse-drug-reactions"]]],
 [5,"HSE","Critique strategies used to prepare for respiratory viral pandemics.",[["RACGP — Managing pandemic influenza in general practice","https://www.racgp.org.au/running-a-practice/practice-management/managing-emergencies-and-pandemics/managing-pandemics/managing-pandemic-influenza-in-general-practic-1"]]],
 [5,"HSE","Evaluate impact of HIV/AIDS as a major global health issue.",[["WHO Fact Sheet 2019 — HIV/AIDS","https://www.who.int/news-room/fact-sheets/detail/hiv-aids"]]],
 [5,"HSE","Evaluate contribution of skin conditions to the global burden of disease.",[["Karimkhani, JAMA Dermatology 2017","https://jamanetwork.com/journals/jamadermatology/fullarticle/2604831"]]],
@@ -115,7 +115,7 @@ const RAW=[
 [6,"CP","Compare and contrast acute versus chronic leukaemias: clinical features, investigation, classification, staging and management.",[["American College of Pathologists — Initial Diagnostic Workup of Acute Leukemia","https://documents.cap.org/documents/acute-leukemia-pocket-guide.pdf"],["ASH Blood — How I treat chronic myelogenous leukaemia","https://ashpublications.org/blood/article/139/21/3138/476939/How-I-treat-chronic-phase-chronic-myelogenous"]]],
 [6,"CP","Analyse lymphoma and multiple myeloma: clinical features, classification, investigation, staging and management principles.",[["Aust J Gen Pract 2018 — Multiple myeloma: updated approach to management","https://www.ajgp.com.au"]]],
 [6,"CP","Evaluate causes of elevated ferritin and pancytopenia; formulate investigation plan to determine underlying aetiology.",[["Australian Red Cross Blood Service 2019 — High Ferritin App","https://highferritin.transfusion.com.au/education"],["RACGP AFP 2012 — Elevated serum ferritin: what should GPs know?","https://www.racgp.org.au/afp/2012/december/elevated-serum-ferritin"]]],
-[6,"SS","Outline investigation of symptoms and signs raising suspicion of cancer: red flag symptoms (haemoptysis, hoarse voice, change in bowel habit, blood in stool, unexplained anaemia, breast lump, dysphagia); describe current recommendations for lung cancer screening.",[["Iversen Scheel, SJPHC 2015 — Investigating symptoms of possible cancer","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4750720/pdf/ipri-33-170.pdf"]]],
+[6,"SS","Outline investigation of symptoms and signs raising suspicion of cancer: red flag symptoms (haemoptysis, hoarse voice, change in bowel habit, blood in stool, unexplained anaemia, breast lump, dysphagia); describe current recommendations for lung cancer screening; list other potential causes and appropriate investigations.",[["Iversen Scheel, SJPHC 2015 — Investigating symptoms of possible cancer","https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4750720/pdf/ipri-33-170.pdf"]]],
 [6,"SS","Recognise patients requiring cancer genetics assessment; understand who needs referral for genetic counselling.",[["NSW eviQ 2017 — GP referral guidelines for cancer genetics assessment","https://www.eviq.org.au/cancer-genetics/referral-guidelines/1147-general-practitioner-referral-guidelines-for"]]],
 [6,"SS","Compare and contrast mechanism of action and common side effect profiles of traditional chemotherapy and immunotherapy.",[]],
 [6,"SS","Differentiate causes of lymphadenopathy: characteristics of lymph nodes on examination; list causes of generalised, cervical, supraclavicular, axillary and inguinal lymphadenopathy; outline appropriate investigations.",[]],
@@ -124,11 +124,62 @@ const RAW=[
 [6,"HSE","Outline causes for unwarranted clinical variation in cancer survival across Australia; identify factors that could address 'Closing the Gap'.",[["Page, Internal Medicine Journal 2016 — Clinical variation in cancer survival across Australia","https://onlinelibrary-wiley-com.ezproxy.newcastle.edu.au/doi/pdf/10.1111/imj.12948"]]],
 [6,"HSE","Review current cancer screening programs in Australia.",[["Dept of Health — Screening for cancer","https://www.health.gov.au/topics/cancer/screening"]]],
 [6,"HSE","Justify management plan for vaccination and prophylactic antibiotics in a patient who has undergone splenectomy.",[["Looke, MJA 2012 — Splenectomy and sepsis","https://www.mja.com.au/journal/2012/196/9/splenectomy-and-sepsis"]]],
-[6,"PD","Formulate a strategy to support shared decision-making in cancer care or non-malignant medical conditions; reflect on own practice.",[["Hoffmann, MJA 2014 — Shared decision-making: what do clinicians need to know?","https://www.mja.com.au/journal/2014/201/1/shared-decision-making-what-do-clinicians-need-know-and-why-should-they-bother"]]]
+[6,"PD","Formulate a strategy to support shared decision-making in cancer care or non-malignant medical conditions; reflect on own practice.",[["Hoffmann, MJA 2014 — Shared decision-making: what do clinicians need to know?","https://www.mja.com.au/journal/2014/201/1/shared-decision-making-what-do-clinicians-need-know-and-why-should-they-bother"]]],
+[5,"PD","Review the guidelines for the diagnosis and management of leprosy.",[["Guidelines for the Diagnosis, Management and Prevention of Leprosy 2023","https://www.who.int/publications/i/item/9789290227076"]]],
+[6,"PD","Review updated management guidelines for multiple myeloma.",[["Aust J Gen Pract 2018 — Multiple myeloma: updated approach to management","https://www.ajgp.com.au"]]],
+[6,"PD","Review causes and investigations of haemolytic anaemia.",[["Life in the Fast Lane — Haemolytic anaemia","https://litfl.com/haemolytic-anaemia/"]]],
+[6,"PD","Explore possible causes for a raised ferritin on the High Ferritin App.",[["Australian Red Cross Blood Service — High Ferritin App","https://highferritin.transfusion.com.au/education"],["RACGP AFP 2012 — Elevated serum ferritin: what should GPs know?","https://www.racgp.org.au/afp/2012/december/elevated-serum-ferritin"]]]
 ];
 
-const COMPLEXITY=[3,3,3,2,2,3,2,3,1,1,1,2,2,1,1,2,1,1,2,2,1,1,3,2,2,3,3,2,3,2,2,3,2,2,1,2,1,1,1,1,2,2,2,2,3,2,2,3,3,3,3,3,2,2,2,2,1,1,2,1,1,1,1,1,1,2,1,1,3,3,3,3,2,2,1,2,1,1,1,1,1,2,2,1,1,3,2,2,2,1,2,2,2,2,2,1,1,2,2,1,1,1,2,1,3,2,3,3,3,3,3,2,2,1,2,2,1,1,2,1,2,2];
-const ALL_LPS=RAW.map((r,i)=>({id:i,topic:r[0],col:r[1],text:r[2],links:r[3]||[],complexity:COMPLEXITY[i]||2}));
+const COMPLEXITY=[3,3,3,2,2,3,2,3,1,1,1,2,2,1,1,2,1,1,2,2,1,1,3,2,2,3,3,2,3,2,2,3,2,2,1,2,1,1,1,1,2,2,2,2,3,2,2,3,3,3,3,3,2,2,2,2,1,1,2,1,1,1,1,1,1,2,1,1,3,3,3,3,2,2,1,2,1,1,1,1,1,2,2,1,1,3,2,2,2,1,2,2,2,2,2,1,1,2,2,1,1,1,2,1,3,2,3,3,3,3,3,2,2,1,2,2,1,1,2,1,2,2,1,1,1,1];
+const DEPRECATED_LP_IDS=[15];
+const ALL_LPS=RAW.map((r,i)=>({id:i,topic:r[0],col:r[1],text:r[2],links:r[3]||[],complexity:COMPLEXITY[i]||2})).filter(l=>!DEPRECATED_LP_IDS.includes(l.id));
+const CANONICAL_LP_BY_ID=Object.fromEntries(ALL_LPS.map(l=>[l.id,l]));
+
+function migrateLpCatalog(st){
+  if(!st||!Array.isArray(st.allLPs)) return {changed:false};
+  let changed=false;
+  const deprecated=new Set(DEPRECATED_LP_IDS);
+  const selectedTopics=new Set(st.allLPs.map(l=>l.topic));
+  const syncLp=lp=>{
+    const src=CANONICAL_LP_BY_ID[lp.id];
+    if(!src) return false;
+    let touched=false;
+    ['topic','col','text','complexity'].forEach(k=>{if(lp[k]!==src[k]){lp[k]=src[k];touched=true;}});
+    const links=JSON.stringify(lp.links||[]),srcLinks=JSON.stringify(src.links||[]);
+    if(links!==srcLinks){lp.links=src.links;touched=true;}
+    return touched;
+  };
+  const filterDeprecated=lps=>{
+    if(!Array.isArray(lps)) return [];
+    const before=lps.length;
+    const kept=lps.filter(l=>!deprecated.has(l.id));
+    if(kept.length!==before) changed=true;
+    kept.forEach(l=>{if(syncLp(l)) changed=true;});
+    return kept;
+  };
+  st.allLPs=filterDeprecated(st.allLPs);
+  (st.days||[]).forEach(d=>{d.lps=filterDeprecated(d.lps||[]);});
+  ['mastery','notes','snoozed'].forEach(k=>{
+    if(!st[k]) return;
+    DEPRECATED_LP_IDS.forEach(id=>{if(Object.prototype.hasOwnProperty.call(st[k],id)){delete st[k][id];changed=true;}});
+  });
+  if(Array.isArray(st.excludedIds)){
+    const before=st.excludedIds.length;
+    st.excludedIds=st.excludedIds.filter(id=>!deprecated.has(id));
+    if(st.excludedIds.length!==before) changed=true;
+  }
+  const existing=new Set(st.allLPs.map(l=>l.id));
+  ALL_LPS.forEach(lp=>{
+    if(!existing.has(lp.id)&&selectedTopics.has(lp.topic)){
+      st.allLPs.push({...lp,links:[...(lp.links||[])]});
+      existing.add(lp.id);
+      changed=true;
+    }
+  });
+  st.allLPs.sort((a,b)=>a.id-b.id);
+  return {changed};
+}
 
 // Additional readings: [topic, title, url]
 const ADDITIONAL=[
@@ -419,7 +470,7 @@ function renderSetup(){
     </div>`;
   }).join('');
 
-  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 19 Apr 2026</div></div>
+  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 7 May 2026</div></div>
   <div class="card" style="background:var(--gray-50)">
     <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
     <div style="border-top:1px solid var(--gray-200);padding-top:12px">
@@ -627,7 +678,7 @@ function showOnboarding(){
   const bufDash=`<span style="font-size:14px;font-weight:300;color:#16a34a;line-height:1">–</span>`;
 
   const slides=[
-    {title:'Welcome to your study planner',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Your 122 learning points are spread across your study period. Each day you get a small set to work through — rate them, snooze anything you need to revisit, and mark the day done.</p><div style="display:flex;flex-direction:column;gap:6px">${pill('green','Confident — got it')}${pill('amber','Getting there — still learning')}${pill('red','Needs work — revisit soon')}</div>`},
+    {title:'Welcome to your study planner',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Your ${state.allLPs.length} learning points are spread across your study period. Each day you get a small set to work through — rate them, snooze anything you need to revisit, and mark the day done.</p><div style="display:flex;flex-direction:column;gap:6px">${pill('green','Confident — got it')}${pill('amber','Getting there — still learning')}${pill('red','Needs work — revisit soon')}</div>`},
     {title:'Snooze to revisit later',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Not ready to rate a point yet? Snooze it — it returns in 3 days so you can review it again before rating.</p>${pill('amber','Snoozed — returning in 3 days')}<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:10px">Days with returning snoozed points show a small <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;vertical-align:middle"></span> amber dot on the Calendar.</p>`},
     {title:'Study ahead for a day off',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">Complete a future day's session early from the Dashboard or Calendar. You can then take that day as a protected day off — streak preserved, no points scheduled.</p><div style="display:flex;flex-direction:column;gap:6px">${pill('purple','Protected — earned day off')}<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f0fdf4;border-radius:6px;border:1.5px dashed #16a34a"><div style="width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0"></div><span style="font-size:12px;color:#15803d">Buffer — free days before deadline</span></div></div>`},
     {title:'Your schedule on the Calendar',body:`<p style="font-size:13px;color:#6b7280;line-height:1.7;margin-bottom:14px">The Calendar tab shows your full schedule. Each circle shows how many points are due — tap any future day to preview and study it early.</p><div style="display:flex;flex-direction:column;gap:2px;border-top:0.5px solid #f3f4f6;padding-top:12px">${calRow(num('4','#1d4ed8'),'#eff6ff','2px solid #3b82f6','19 Apr','4 learning points due — today','#1d4ed8')}${sep()}${calRow(num('3','#6b7280'),'#f9fafb','1px solid #e5e7eb','20 Apr','3 learning points due','')}${sep()}${calRow(tick,'#faf5ff','2px solid #a855f7','21 Apr','Protected day — no points','#7c3aed')}${sep()}${calRow(num('3','#6b7280'),'#f9fafb','1px solid #e5e7eb','22 Apr','3 learning points due','')}${sep()}${calRow(bufDash,'#f0fdf4','1.5px dashed #16a34a','23 Apr','Buffer day — no points','#15803d')}</div>`},
@@ -1976,6 +2027,7 @@ function renderSettings(){
   const te=addDays(pd(state.deadline),-state.bufferDays-1);
   const owl=state.nightOwlHours||0;
   const debugOn=state.debugMode||false;
+  const complexityTotal=state.allLPs.reduce((sum,lp)=>sum+(lp.complexity||2),0);
 
   let debugPanel='';
   if(debugOn){
@@ -2127,7 +2179,7 @@ function renderSettings(){
       "/>
       Enable complexity-weighted scheduling
     </label>
-    ${state.complexityMode?`<div style="font-size:12px;color:var(--gray-400);margin-top:8px">Active — schedule redistributed by complexity. Total: 226 pts across ${state.allLPs.length} LPs, avg ${(226/state.allLPs.length).toFixed(1)} per LP.</div>`:''}
+    ${state.complexityMode?`<div style="font-size:12px;color:var(--gray-400);margin-top:8px">Active — schedule redistributed by complexity. Total: ${complexityTotal} pts across ${state.allLPs.length} LPs, avg ${(complexityTotal/state.allLPs.length).toFixed(1)} per LP.</div>`:''}
   </div>
   <div class="card"><div class="card-title">New day starts after</div>
     <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Set to the latest time you think you'll be studying. If you study past midnight, today's session won't roll over until then.</div>
@@ -2192,7 +2244,7 @@ function renderSettings(){
   <div class="card"><div class="card-title">About</div>
     <div style="font-size:13px;color:var(--gray-500);line-height:1.8">
       <div>JMP 2026 Study Planner</div>
-      <div style="font-size:12px;color:var(--gray-400)">Last updated: 19 Apr 2026</div>
+      <div style="font-size:12px;color:var(--gray-400)">Last updated: 7 May 2026</div>
     </div>
   </div>
   <div class="card"><div class="card-title">Danger zone</div><button class="btn danger" onclick="resetPlan()">Reset and start over</button></div>`;
@@ -2290,6 +2342,7 @@ function importProgress(input){
         resolvedAhead:false,
         debugMode:false,
       };
+      migrateLpCatalog(state);
       lpIntegrityCheck(state);
       // Run a full day-change pass so recalc fires — this sweeps stale snoozes
       // and detects any missed days in the imported state.
@@ -2568,6 +2621,7 @@ function resetPlan(){if(!confirm('Reset everything and start over?'))return;stat
       seen[d.date]=true;
       return true;
     });
+    const catalogMigration=migrateLpCatalog(state);
     // Detect missed days — past uncompleted study days with LPs
     const today=dsNow();
     const missed=state.days.filter(d=>d.date<today&&!d.completed&&!d.skipped&&!d.isBuffer&&!d.isProtected&&d.lps.length>0);
@@ -2587,7 +2641,7 @@ function resetPlan(){if(!confirm('Reset everything and start over?'))return;stat
       Object.keys(state.snoozed||{}).map(Number).forEach(id=>accounted.add(id));
       (state.excludedIds||[]).forEach(id=>accounted.add(id));
       const missing=state.allLPs.filter(l=>!accounted.has(l.id));
-      if(missing.length) recalc(state);
+      if(missing.length||catalogMigration.changed) recalc(state);
     }
     applyDayChange();
     activeTab='Dashboard';
