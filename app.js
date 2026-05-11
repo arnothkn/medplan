@@ -405,7 +405,7 @@ function lpIntegrityCheck(st){
 function render(){
   const app=document.getElementById('app');
   if(!state){app.innerHTML=renderSetup();upPrev();initDragDrop();return;}
-  const tabs=['Dashboard','Study','Calendar','Progress','History','Notes','Settings'];
+  const tabs=['Dashboard','Study','Calendar','Progress','History','Notes','Search','Settings'];
   const modal=state.viewingDay?renderViewModal():state.pendingResolve?renderResolvePopup():'';
   app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${state.allLPs.length} learning points</div></div>
   <div class="tabs">${tabs.map(t=>`<button class="tab${activeTab===t?' active':''}" onclick="sw('${t}')">${t}</button>`).join('')}</div>
@@ -438,6 +438,7 @@ function sw(t){
     }
   }
   activeTab=t;render();
+  if(t==='Search') setTimeout(()=>{const i=document.getElementById('searchInput');if(i){i.focus();const v=i.value;i.value='';i.value=v;}},0);
 }
 function rerender(){document.getElementById('tc').innerHTML=renderTab();restoreOpenNotes();}
 function renderTab(){
@@ -447,6 +448,7 @@ function renderTab(){
   if(activeTab==='History')return renderHistory();
   if(activeTab==='Calendar')return renderCalendar();
   if(activeTab==='Notes')return renderNotes();
+  if(activeTab==='Search')return renderSearch();
   if(activeTab==='Settings')return renderSettings();
 }
 
@@ -2602,6 +2604,290 @@ function applyBuf(){
   recalc(state);save(state);rerender();
 }
 function resetPlan(){if(!confirm('Reset everything and start over?'))return;state=null;lpOrder='random';lpTopicOrder=[1,2,3,4,5,6];try{localStorage.removeItem('jmp2026_v3');}catch(e){}render();}
+
+// ===== SEARCH =====
+let searchQuery='';
+let searchExpanded=null; // LP id of expanded row
+let searchActiveIdx=0;
+
+function escHtml(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+const fmtShort=d=>pd(d).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+
+function searchHighlight(text,query){
+  if(!query||!text) return escHtml(text);
+  const escaped=escHtml(text);
+  const escQ=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  try{const re=new RegExp(escQ,'gi');return escaped.replace(re,m=>`<mark class="search-mark">${m}</mark>`);}
+  catch(e){return escaped;}
+}
+
+function searchSnoozedActive(id){
+  const s=state&&state.snoozed&&state.snoozed[id];
+  if(!s) return null;
+  const rd=typeof s==='string'?s:s.returnDate;
+  return rd>dsNow()?rd:null;
+}
+
+function searchDateVariants(dateStr,label){
+  const d=pd(dateStr);
+  const day=d.getDate();
+  const month=d.getMonth()+1;
+  const year=d.getFullYear();
+  let monthLong='',monthShort='',weekdayLong='',weekdayShort='';
+  try{
+    monthLong=d.toLocaleDateString('en-AU',{month:'long'});
+    monthShort=d.toLocaleDateString('en-AU',{month:'short'});
+    weekdayLong=d.toLocaleDateString('en-AU',{weekday:'long'});
+    weekdayShort=d.toLocaleDateString('en-AU',{weekday:'short'});
+  }catch(e){}
+  return [
+    dateStr,
+    `${day} ${monthLong} ${year}`,
+    `${day} ${monthLong}`,
+    `${day} ${monthShort}`,
+    `${monthLong} ${day}`,
+    `${monthShort} ${day}`,
+    `${day}/${month}`,
+    `${month}/${day}`,
+    `${day}/${month}/${year}`,
+    weekdayLong,
+    weekdayShort,
+    label,
+  ].join(' ');
+}
+
+function searchBuildHaystack(lp){
+  const note=state.notes&&state.notes[lp.id];
+  const day=state.days.find(d=>d.lps.some(l=>l.id===lp.id)&&!d.completed);
+  const completedDay=state.days.find(d=>d.completed&&d.lps.some(l=>l.id===lp.id));
+  const snoozedDate=searchSnoozedActive(lp.id);
+  const excluded=(state.excludedIds||[]).includes(lp.id);
+  const parts=[
+    `lp${lp.id}`,`lp ${lp.id}`,`#${lp.id}`,`${lp.id}`,
+    lp.text||'',
+    TNAMES[lp.topic-1]||'',
+    `t${lp.topic}`,`topic ${lp.topic}`,
+    COLS[lp.col]||'',
+    note&&note.text||'',
+    day?searchDateVariants(day.date,'due scheduled'):'',
+    completedDay?searchDateVariants(completedDay.date,'done completed finished'):'',
+    snoozedDate?searchDateVariants(snoozedDate,'snoozed'):'',
+    excluded?'excluded':'',
+  ];
+  return parts.join(' ').toLowerCase();
+}
+
+function searchLPs(query){
+  const q=query.trim().toLowerCase();
+  if(!q) return [];
+  const numericExact=/^\d+$/.test(q)?parseInt(q,10):null;
+  const results=[];
+  for(const lp of state.allLPs){
+    const haystack=searchBuildHaystack(lp);
+    if(!haystack.includes(q)) continue;
+    let score=0;
+    if(numericExact!==null&&lp.id===numericExact) score+=10000;
+    if((lp.text||'').toLowerCase().includes(q)) score+=200;
+    if((`lp${lp.id}`).includes(q)||(`lp ${lp.id}`).includes(q)) score+=80;
+    if((TNAMES[lp.topic-1]||'').toLowerCase().includes(q)) score+=40;
+    if((COLS[lp.col]||'').toLowerCase().includes(q)) score+=25;
+    const day=state.days.find(d=>d.lps.some(l=>l.id===lp.id));
+    if(day){
+      const dvar=searchDateVariants(day.date,day.completed?'done':'due').toLowerCase();
+      if(dvar.includes(q)) score+=15;
+    }
+    const noteText=(state.notes&&state.notes[lp.id]&&state.notes[lp.id].text)||'';
+    if(noteText.toLowerCase().includes(q)) score+=5;
+    results.push({lp,score});
+  }
+  results.sort((a,b)=>b.score-a.score||a.lp.id-b.lp.id);
+  return results.map(r=>r.lp);
+}
+
+function searchLpStatus(lp){
+  if((state.excludedIds||[]).includes(lp.id)) return {kind:'excluded',label:'Excluded',date:null};
+  const completedDay=state.days.find(d=>d.completed&&d.lps.some(l=>l.id===lp.id));
+  if(completedDay) return {kind:'done',label:'Done',date:completedDay.date};
+  const snoozedDate=searchSnoozedActive(lp.id);
+  if(snoozedDate) return {kind:'snoozed',label:'Snz',date:snoozedDate};
+  const day=state.days.find(d=>!d.completed&&d.lps.some(l=>l.id===lp.id));
+  if(day) return {kind:'scheduled',label:'Due',date:day.date};
+  return {kind:'unscheduled',label:'',date:null};
+}
+
+function renderSearch(){
+  return `<div class="search-input-wrap">
+    <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="searchInput" class="search-input" type="text" placeholder="Search text, ID, or date — try '2 December' or 'LP 47'" value="${escHtml(searchQuery)}" oninput="onSearchInput(this.value)" onkeydown="onSearchKeydown(event)" autocomplete="off" autocapitalize="off" spellcheck="false"/>
+    <button id="searchClear" class="search-clear" style="display:${searchQuery?'inline-flex':'none'}" onclick="clearSearch()">✕</button>
+  </div>
+  <div id="searchResults" class="search-results">${renderSearchResultsHtml()}</div>`;
+}
+
+function onSearchInput(val){
+  searchQuery=val;
+  searchActiveIdx=0;
+  searchExpanded=null;
+  const clear=document.getElementById('searchClear');
+  if(clear) clear.style.display=val?'inline-flex':'none';
+  const el=document.getElementById('searchResults');
+  if(el){el.innerHTML=renderSearchResultsHtml();el.scrollTop=0;}
+}
+
+function clearSearch(){
+  const i=document.getElementById('searchInput');
+  if(i){i.value='';i.focus();}
+  onSearchInput('');
+}
+
+function renderSearchResultsHtml(){
+  const q=searchQuery.trim();
+  if(!q) return renderSearchEmptyHtml();
+  const results=searchLPs(q);
+  if(!results.length){
+    return `<div class="search-empty"><div class="search-empty-title">No matches</div><div class="search-empty-sub">Try a different word, an LP number, or a date like "2 Dec" or "december".</div></div>`;
+  }
+  return `<div class="search-results-list">${results.map((lp,i)=>renderSearchRowHtml(lp,i)).join('')}</div>`;
+}
+
+function renderSearchEmptyHtml(){
+  const completedDays=state.days.filter(d=>d.completed).slice(-3).reverse();
+  const lastLps=[];
+  for(const d of completedDays){
+    for(const lp of d.lps){
+      if(lastLps.length<5&&!lastLps.find(x=>x.id===lp.id)) lastLps.push(lp);
+    }
+  }
+  if(!lastLps.length){
+    return `<div class="search-empty"><div class="search-empty-title">Search learning points</div><div class="search-empty-sub">Type any text, an LP number, or a date to find what you need.</div></div>`;
+  }
+  return `<div class="search-section-title">Recently studied</div><div class="search-results-list">${lastLps.map((lp,i)=>renderSearchRowHtml(lp,i)).join('')}</div>`;
+}
+
+function renderSearchRowHtml(lp,idx){
+  const status=searchLpStatus(lp);
+  const m=getMastery(lp.id);
+  const note=state.notes&&state.notes[lp.id];
+  const hasNoteText=!!(note&&note.text);
+  const noteImageCount=(note&&note.images&&note.images.length)||0;
+  const expanded=searchExpanded===lp.id;
+  const active=searchQuery.trim()&&searchActiveIdx===idx;
+  const RATING_CLS={0:'unrated',1:'red',2:'amber',3:'green'};
+  const TL_LBL={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+  const q=searchQuery.trim();
+  const topicFull=(TNAMES[lp.topic-1]||'').replace(': ',' · ');
+  const statusText=status.kind==='unscheduled'?'':(status.date?`${status.label} ${fmtShort(status.date)}`:status.label);
+  const statusLineHtml=statusText?`<div class="search-status-line search-sl-${status.kind}">${searchHighlight(statusText,q)}</div>`:'';
+  let noteSnippetHtml='';
+  if(q&&hasNoteText&&note.text.toLowerCase().includes(q.toLowerCase())&&!(lp.text||'').toLowerCase().includes(q.toLowerCase())){
+    const lc=note.text.toLowerCase();
+    const i2=lc.indexOf(q.toLowerCase());
+    const start=Math.max(0,i2-30);
+    const end=Math.min(note.text.length,i2+q.length+60);
+    const snippet=(start>0?'…':'')+note.text.substring(start,end)+(end<note.text.length?'…':'');
+    noteSnippetHtml=`<div class="search-note-snippet">📝 ${searchHighlight(snippet,q)}</div>`;
+  } else if(hasNoteText||noteImageCount){
+    noteSnippetHtml=`<div class="search-note-indicator">📝 Note${noteImageCount?` · ${noteImageCount} image${noteImageCount!==1?'s':''}`:''}</div>`;
+  }
+  const hasLinks=lp.links&&lp.links.length>0;
+  const linkIconHtml=hasLinks?`<span class="search-link-icon" title="Has linked resource${lp.links.length!==1?'s':''}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>`:'';
+  const expandedHtml=expanded?renderSearchExpandedHtml(lp):'';
+  return `<div class="search-result search-t-${lp.topic}${active?' active':''}${expanded?' expanded':''}" data-idx="${idx}" data-lp="${lp.id}" onclick="toggleSearchExpand(${lp.id})">
+    <div class="search-result-row">
+      <div class="search-result-main">
+        <div class="search-tlabel search-tlabel-${lp.topic}">${searchHighlight(topicFull,q)}${linkIconHtml}</div>
+        <div class="search-result-text">${searchHighlight(lp.text||'',q)}</div>
+        ${noteSnippetHtml}
+        ${statusLineHtml}
+      </div>
+      <div class="search-result-side">
+        <span class="search-dot search-dot-${RATING_CLS[m]}" title="${TL_LBL[m]}"></span>
+      </div>
+    </div>
+    ${expandedHtml}
+  </div>`;
+}
+
+function renderSearchExpandedHtml(lp){
+  const note=state.notes&&state.notes[lp.id];
+  const m=getMastery(lp.id);
+  const RATING_CLS={0:'unrated',1:'red',2:'amber',3:'green'};
+  const TL_LBL={0:'Unrated',1:'Needs work',2:'Getting there',3:'Confident'};
+  const status=searchLpStatus(lp);
+  const excludedCellHtml=status.kind==='excluded'
+    ? `<span class="search-info-cell"><span class="search-lbl">Status</span><span class="search-val search-val-excl">Excluded</span></span>`
+    : '';
+  const infoStripHtml=`<div class="search-info-strip">
+    <span class="search-info-cell"><span class="search-lbl">ID</span><span class="search-val">LP ${lp.id}</span></span>
+    ${excludedCellHtml}
+    <span class="search-info-cell"><span class="search-lbl">Complexity</span><span class="search-val">${lp.complexity||'-'} / 3</span></span>
+    <span class="search-info-cell search-info-rating"><span class="search-lbl">Rating</span><span class="search-dot search-dot-${RATING_CLS[m]}"></span><span class="search-val">${TL_LBL[m]}</span></span>
+  </div>`;
+  const linksHtml=lp.links&&lp.links.length
+    ?`<div class="lp-links">${lp.links.map(([label,url])=>`<a class="lp-link-btn" href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()">&#128279; ${escHtml(label)}</a>`).join('')}</div>`
+    :'';
+  const noteHtml=(note&&(note.text||(note.images&&note.images.length)))
+    ?`<div class="search-note-block">
+        ${note.text?`<div class="search-note-text">${linkify(note.text)}</div>`:''}
+        ${note.images&&note.images.length?`<div class="search-note-images">${note.images.map(img=>`<img src="${img}" onclick="event.stopPropagation();openNoteImage('${img}')"/>`).join('')}</div>`:''}
+      </div>`
+    :`<div class="search-note-empty">No notes yet.</div>`;
+  const masteryBtns=[1,2,3].map(v=>{
+    const cls=['','tl-r','tl-a','tl-g'][v];
+    const dotColor=['','var(--red)','var(--amber)','var(--green)'][v];
+    const label=['','Needs work','Getting there','Confident'][v];
+    return `<button class="tl-btn ${cls}${m===v?' on':''}" onclick="event.stopPropagation();setMastery(${lp.id},${m===v?0:v});refreshSearchResults()"><div class="tldot" style="background:${dotColor}"></div>${label}</button>`;
+  }).join('');
+  return `<div class="search-expanded-content" onclick="event.stopPropagation()">
+    ${infoStripHtml}
+    ${linksHtml}
+    <div class="tl-group" style="margin-top:10px">${masteryBtns}</div>
+    <div class="search-expanded-note">${noteHtml}</div>
+  </div>`;
+}
+
+function refreshSearchResults(){
+  const el=document.getElementById('searchResults');
+  if(el) el.innerHTML=renderSearchResultsHtml();
+}
+
+function toggleSearchExpand(id){
+  searchExpanded=searchExpanded===id?null:id;
+  refreshSearchResults();
+}
+
+function setSearchActive(idx){
+  document.querySelectorAll('#searchResults .search-result.active').forEach(el=>el.classList.remove('active'));
+  const el=document.querySelector(`#searchResults .search-result[data-idx="${idx}"]`);
+  if(el){el.classList.add('active');el.scrollIntoView({block:'nearest'});}
+}
+
+function onSearchKeydown(e){
+  if(e.key==='Escape'){
+    if(searchExpanded!==null){searchExpanded=null;refreshSearchResults();}
+    else if(searchQuery){clearSearch();}
+    e.preventDefault();
+    return;
+  }
+  const q=searchQuery.trim();
+  if(!q) return;
+  const results=searchLPs(q);
+  if(!results.length) return;
+  if(e.key==='ArrowDown'){
+    searchActiveIdx=Math.min(results.length-1,searchActiveIdx+1);
+    setSearchActive(searchActiveIdx);
+    e.preventDefault();
+  } else if(e.key==='ArrowUp'){
+    searchActiveIdx=Math.max(0,searchActiveIdx-1);
+    setSearchActive(searchActiveIdx);
+    e.preventDefault();
+  } else if(e.key==='Enter'){
+    const lp=results[searchActiveIdx];
+    if(lp) toggleSearchExpand(lp.id);
+    e.preventDefault();
+  }
+}
 
 (function(){
   const s=load();
