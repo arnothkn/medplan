@@ -2043,13 +2043,54 @@ function renderSettings(){
       const streak=(()=>{let s=0,c=pd(dsNow());while(true){const d=state.days.find(d=>d.date===ds(c));if(d&&(d.completed||d.isProtected)){s++;c=addDays(c,-1);}else break;}return s;})();
 
       const sessionInfo=JSON.stringify({
-        today:dsNow(),startDate:state.startDate,deadline:state.deadline,
+        today:dsNow(),dateOverride:_dateOverride||null,
+        startDate:state.startDate,deadline:state.deadline,
         bufferDays:state.bufferDays,nightOwlHours:state.nightOwlHours||0,
         aheadDate:state.aheadDate||null,lastAheadDate:state.lastAheadDate||null,
         calendarSessionDate:state.calendarSessionDate||null,
         pendingResolve:state.pendingResolve||false,resolveShowWarning:state.resolveShowWarning||false,
-        resolvedAhead:state.resolvedAhead||false,streak
+        resolvedAhead:state.resolvedAhead||false,streak,
+        todayCompletedDates:state.todayCompletedDates||[],
+        todayCompletedDatesDay:state.todayCompletedDatesDay||null,
+        missedNotice:state.missedNotice||null
       },null,2);
+
+      const catalogInfo=(()=>{
+        const stateIds=new Set((state.allLPs||[]).map(l=>l.id));
+        const canonicalIds=new Set(ALL_LPS.map(l=>l.id));
+        const missingFromState=ALL_LPS.filter(l=>!stateIds.has(l.id)).map(l=>'LP#'+l.id+' T'+l.topic);
+        const extraInState=(state.allLPs||[]).filter(l=>!canonicalIds.has(l.id)).map(l=>'LP#'+l.id);
+        const drift=[];
+        (state.allLPs||[]).forEach(lp=>{
+          const c=CANONICAL_LP_BY_ID[lp.id];if(!c)return;
+          const diffs=[];
+          if(lp.topic!==c.topic)diffs.push('topic:'+lp.topic+'→'+c.topic);
+          if(lp.col!==c.col)diffs.push('col:'+lp.col+'→'+c.col);
+          if(lp.text!==c.text)diffs.push('text');
+          if((lp.complexity||2)!==(c.complexity||2))diffs.push('complexity:'+lp.complexity+'→'+c.complexity);
+          if(diffs.length)drift.push('LP#'+lp.id+' ['+diffs.join(',')+']');
+        });
+        return JSON.stringify({
+          rawEntries:RAW.length,
+          activeCanonical:ALL_LPS.length,
+          deprecatedIds:DEPRECATED_LP_IDS,
+          stateAllLPs:(state.allLPs||[]).length,
+          missingFromState:missingFromState.length?missingFromState:'none',
+          extraInState:extraInState.length?extraInState:'none',
+          driftFromCanonical:drift.length?drift:'none (state matches canonical)'
+        },null,2);
+      })();
+
+      const arInfo=(()=>{
+        const assignments=getARAssignments();
+        const byDate={};
+        ADDITIONAL.forEach((a,i)=>{
+          const d=assignments[i];if(!d)return;
+          (byDate[d]=byDate[d]||[]).push('T'+a[0]+': '+a[1].slice(0,60)+(a[1].length>60?'…':''));
+        });
+        const lines=Object.keys(byDate).sort().map(d=>d+'\n  '+byDate[d].join('\n  '));
+        return 'total readings: '+ADDITIONAL.length+'\nassigned days: '+Object.keys(byDate).length+'\narExpanded: '+!!state.arExpanded+'\n\n'+(lines.join('\n\n')||'(none assigned — no scheduled days)');
+      })();
 
       const schedInfo=JSON.stringify({
         lpOrder:Array.isArray(state.lpOrder)?'custom:'+state.lpOrder.join(','):state.lpOrder||'random',
@@ -2135,18 +2176,41 @@ function renderSettings(){
         d.date+'  lps:'+d.lps.length+'  completed:'+d.completed+'  calStudy:'+!!d.calendarStudy
       ).join('\n')||'none';
 
+      const searchInfo=JSON.stringify({
+        activeTab:activeTab||null,
+        searchQuery:searchQuery||'',
+        searchActiveIdx,
+        searchExpanded:searchExpanded||null
+      },null,2);
+
+      const uiInfo=JSON.stringify({
+        calendarView:state.calendarView||'calendar',
+        calendarPeek:state.calendarPeek||null,
+        viewingDay:state.viewingDay||null,
+        topicExpanded:state.topicExpanded||[],
+        arExpanded:!!state.arExpanded,
+        notesSort:state.notesSort||'topic',
+        notesMastery:state.notesMastery||[0,1,2,3],
+        notesPrintSettingsOpen:!!state.notesPrintSettingsOpen,
+        openNotes:[...openNotes]
+      },null,2);
+
       debugPanel=`<div class="card" style="font-family:monospace">
         <div class="card-title" style="margin-bottom:4px">Debug</div>
         <div style="font-size:11px;color:var(--gray-400);margin-bottom:12px">Tap any block to copy. Green flash = copied.</div>
         ${preBlock('Session state ('+dsNow()+')', sessionInfo, true)}
         ${preBlock('Schedule & settings', schedInfo, false)}
         ${preBlock('LP integrity check', integrityInfo, false)}
+        ${preBlock('LP catalog (RAW '+RAW.length+' · active '+ALL_LPS.length+' · deprecated '+DEPRECATED_LP_IDS.length+')', catalogInfo, false)}
+        ${preBlock('Additional readings ('+ADDITIONAL.length+')', arInfo, false)}
         ${preBlock('Notes ('+Object.keys(state.notes||{}).filter(id=>{const n=(state.notes||{})[id];return n&&(n.text||(n.images&&n.images.length));}).length+')', notesInfo, false)}
         ${preBlock('Snoozed LPs ('+Object.keys(state.snoozed||{}).length+') — queue: ['+([...pendingSnoozed].join(', ')||'empty')+']', snoozedInfo, false)}
         ${preBlock('Days ('+state.days.length+' total)', daysInfo, false)}
         ${preBlock('Mastery ('+Object.keys(m).length+' rated)', masteryInfo, false)}
         ${preBlock('LP counts by topic', topicsInfo, false)}
         ${preBlock('Protected days', protInfo, false)}
+        ${preBlock('Search state', searchInfo, false)}
+        ${preBlock('UI state', uiInfo, false)}
         ${preBlock('Raw state (full)', JSON.stringify(state,null,2), false)}
       </div>`;
     }catch(e){
