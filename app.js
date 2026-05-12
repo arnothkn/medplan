@@ -239,13 +239,26 @@ function getToday(){return state&&state.days.find(d=>d.date===dsNow());}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 function distributeByComplexity(lps, numDays){
+  // Preserves input LP order — callers sort by learning order first, and a
+  // round-robin "least loaded bin" assignment would scatter that order across
+  // days. Instead, walk LPs in order and decide where each bin ends.
   const bins=Array.from({length:numDays},()=>[]);
-  const totals=new Array(numDays).fill(0);
-  for(const lp of lps){
-    let minIdx=0;
-    for(let i=1;i<numDays;i++) if(totals[i]<totals[minIdx]) minIdx=i;
-    bins[minIdx].push(lp);
-    totals[minIdx]+=(lp.complexity||2);
+  if(!lps.length||numDays<=0) return bins;
+  if(numDays===1){bins[0]=lps.slice();return bins;}
+  const target=lps.reduce((s,lp)=>s+(lp.complexity||2),0)/numDays;
+  let binIdx=0,cur=0;
+  for(let i=0;i<lps.length;i++){
+    const c=lps[i].complexity||2;
+    const remainingLPs=lps.length-i;
+    const remainingBinsAfter=numDays-1-binIdx;
+    // Force a new bin if staying would starve later bins of LPs.
+    const mustAdvance=bins[binIdx].length>0&&remainingLPs<=remainingBinsAfter;
+    // Open a new bin if the current one is at/over target and adding this LP
+    // would overshoot more than stopping here.
+    const shouldAdvance=bins[binIdx].length>0&&cur+c>target&&Math.abs(cur-target)<=Math.abs(cur+c-target);
+    if(binIdx<numDays-1&&(mustAdvance||shouldAdvance)){binIdx++;cur=0;}
+    bins[binIdx].push(lps[i]);
+    cur+=c;
   }
   return bins;
 }
@@ -472,7 +485,7 @@ function renderSetup(){
     </div>`;
   }).join('');
 
-  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 7 May 2026</div></div>
+  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 12 May 2026</div></div>
   <div class="card" style="background:var(--gray-50)">
     <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
     <div style="border-top:1px solid var(--gray-200);padding-top:12px">
@@ -2310,7 +2323,7 @@ function renderSettings(){
   <div class="card"><div class="card-title">About</div>
     <div style="font-size:13px;color:var(--gray-500);line-height:1.8">
       <div>JMP 2026 Study Planner</div>
-      <div style="font-size:12px;color:var(--gray-400)">Last updated: 7 May 2026</div>
+      <div style="font-size:12px;color:var(--gray-400)">Last updated: 12 May 2026</div>
     </div>
   </div>
   <div class="card"><div class="card-title">Danger zone</div><button class="btn danger" onclick="resetPlan()">Reset and start over</button></div>`;
