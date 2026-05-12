@@ -2716,10 +2716,82 @@ function searchLpStatus(lp){
   return {kind:'unscheduled',label:'',date:null};
 }
 
+// Additional readings search
+function searchARStatus(index){
+  const assignments=getARAssignments();
+  const date=assignments[index];
+  if(!date) return {kind:'unscheduled',label:'',date:null};
+  const day=state.days.find(d=>d.date===date);
+  return day&&day.completed
+    ? {kind:'done',label:'Seen',date}
+    : {kind:'scheduled',label:'Due',date};
+}
+
+function searchARBuildHaystack(ar,index){
+  const [topic,title,url]=ar;
+  const st=searchARStatus(index);
+  const parts=[
+    title||'',
+    url||'',
+    TNAMES[topic-1]||'',
+    `t${topic}`,`topic ${topic}`,
+    'additional reading','supplementary reading',
+    st.date?searchDateVariants(st.date,st.kind==='done'?'seen done':'due scheduled'):'',
+  ];
+  return parts.join(' ').toLowerCase();
+}
+
+function searchAdditional(query){
+  const q=query.trim().toLowerCase();
+  if(!q) return [];
+  const results=[];
+  ADDITIONAL.forEach((ar,i)=>{
+    const haystack=searchARBuildHaystack(ar,i);
+    if(!haystack.includes(q)) return;
+    const [topic,title,url]=ar;
+    let score=0;
+    if((title||'').toLowerCase().includes(q)) score+=200;
+    if((TNAMES[topic-1]||'').toLowerCase().includes(q)) score+=40;
+    const st=searchARStatus(i);
+    if(st.date){
+      const dvar=searchDateVariants(st.date,st.kind==='done'?'seen':'due').toLowerCase();
+      if(dvar.includes(q)) score+=15;
+    }
+    if((url||'').toLowerCase().includes(q)) score+=2;
+    results.push({ar,i,score});
+  });
+  results.sort((a,b)=>b.score-a.score||a.i-b.i);
+  return results;
+}
+
+function renderSearchARRowHtml(ar,index,query){
+  const [topic,title,url]=ar;
+  const st=searchARStatus(index);
+  const statusText=st.kind==='unscheduled'?'':(st.date?`${st.label} ${fmtShort(st.date)}`:st.label);
+  const statusLineHtml=statusText?`<div class="search-status-line search-sl-${st.kind}">${searchHighlight(statusText,query)}</div>`:'';
+  const bookIconHtml=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`;
+  const extLinkIconHtml=`<span class="search-ar-extlink" title="Opens in a new tab"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span>`;
+  const seenBadgeHtml=st.kind==='done'?`<span class="search-ar-seen">Seen</span>`:'';
+  const labelText=`Additional reading · T${topic}`;
+  return `<a class="search-result search-result-ar" href="${url}" target="_blank" rel="noopener" data-ar="${index}" style="display:block;text-decoration:none;color:inherit">
+    <div class="search-result-row">
+      <div class="search-result-main">
+        <div class="search-tlabel search-tlabel-ar">${bookIconHtml}<span>${searchHighlight(labelText,query)}</span></div>
+        <div class="search-result-text">${searchHighlight(title||'',query)}</div>
+        ${statusLineHtml}
+      </div>
+      <div class="search-result-side" style="width:auto;flex-direction:row;align-items:center;gap:6px;padding-top:2px">
+        ${seenBadgeHtml}
+        ${extLinkIconHtml}
+      </div>
+    </div>
+  </a>`;
+}
+
 function renderSearch(){
   return `<div class="search-input-wrap">
     <svg class="search-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <input id="searchInput" class="search-input" type="text" placeholder="Search text, ID, or date — try '2 December' or 'LP 47'" value="${escHtml(searchQuery)}" oninput="onSearchInput(this.value)" onkeydown="onSearchKeydown(event)" autocomplete="off" autocapitalize="off" spellcheck="false"/>
+    <input id="searchInput" class="search-input" type="text" placeholder="Search points, readings, IDs, or dates" value="${escHtml(searchQuery)}" oninput="onSearchInput(this.value)" onkeydown="onSearchKeydown(event)" autocomplete="off" autocapitalize="off" spellcheck="false"/>
     <button id="searchClear" class="search-clear" style="display:${searchQuery?'inline-flex':'none'}" onclick="clearSearch()">✕</button>
   </div>
   <div id="searchResults" class="search-results">${renderSearchResultsHtml()}</div>`;
@@ -2744,11 +2816,18 @@ function clearSearch(){
 function renderSearchResultsHtml(){
   const q=searchQuery.trim();
   if(!q) return renderSearchEmptyHtml();
-  const results=searchLPs(q);
-  if(!results.length){
-    return `<div class="search-empty"><div class="search-empty-title">No matches</div><div class="search-empty-sub">Try a different word, an LP number, or a date like "2 Dec" or "december".</div></div>`;
+  const lpResults=searchLPs(q);
+  const arResults=searchAdditional(q);
+  if(!lpResults.length&&!arResults.length){
+    return `<div class="search-empty"><div class="search-empty-title">No matches</div><div class="search-empty-sub">Try a different word, an LP number, a reading title, or a date like "2 Dec" or "december".</div></div>`;
   }
-  return `<div class="search-results-list">${results.map((lp,i)=>renderSearchRowHtml(lp,i)).join('')}</div>`;
+  const lpSection=lpResults.length
+    ?`<div class="search-section-title">Learning points · ${lpResults.length}</div><div class="search-results-list">${lpResults.map((lp,i)=>renderSearchRowHtml(lp,i)).join('')}</div>`
+    :'';
+  const arSection=arResults.length
+    ?`<div class="search-section-title" style="margin-top:${lpResults.length?'16px':'0'}">Additional readings · ${arResults.length}</div><div class="search-results-list">${arResults.map(({ar,i})=>renderSearchARRowHtml(ar,i,q)).join('')}</div>`
+    :'';
+  return `${lpSection}${arSection}`;
 }
 
 function renderSearchEmptyHtml(){
