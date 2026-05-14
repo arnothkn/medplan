@@ -511,9 +511,7 @@ function renderSetup(){
   lpOwlHours=0;
   const today=dsNow(),dead=ds(addDays(new Date(),42));
 
-  const tnames=['T1: Cardiovascular & Respiratory','T2: Gastroenterology & Renal','T3: Neurology, Endocrinology & Diabetes','T4: Rheumatology, Older Person\'s Health & Palliative Care','T5: Infectious Disease, Sexual Health & Dermatology','T6: Oncology & Haematology'];
-
-  const lpListHtml=tnames.map((tn,ti)=>{
+  const lpListHtml=TNAMES.map((tn,ti)=>{
     const topicLps=ALL_LPS.filter(l=>l.topic===ti+1);
     return`<div style="margin-bottom:12px">
       <div onclick="toggleExcludeTopic(${ti+1},this)" data-topic="${ti+1}" style="font-size:11px;font-weight:500;color:var(--gray-500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;cursor:pointer;padding:4px 6px;border-radius:4px;margin-left:-6px;user-select:none" onmouseover="this.style.background='var(--gray-100)'" onmouseout="this.style.background=''">☐ ${tn}</div>
@@ -524,78 +522,168 @@ function renderSetup(){
     </div>`;
   }).join('');
 
-  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics <span class="badge bp" style="margin-left:4px">Medicine</span></div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 14 May 2026</div></div>
-  <div class="card" style="background:var(--gray-50)">
-    <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
-    <div style="border-top:1px solid var(--gray-200);padding-top:12px">
-      <div style="font-size:12px;font-weight:500;color:var(--gray-600);margin-bottom:6px">Progress is saved automatically in your browser.</div>
-      <ul style="font-size:12px;color:var(--gray-500);line-height:1.8;margin:0;padding-left:16px">
-        <li>Use the same browser on the same device each time</li>
-        <li>Regularly export your progress via the Export button in Settings</li>
-        <li>Use Import to restore your save file on a new device</li>
-        <li>Avoid clearing browser data — this will wipe your progress. Export first if you need to.</li>
-        <li>Don't use incognito mode — progress won't be saved during that session.</li>
-      </ul>
+  const owlPresets=[[0,'Midnight'],[2,'2 am'],[4,'4 am'],[6,'6 am']];
+  const owlPills=owlPresets.map(([h,lbl])=>`<button type="button" class="setup-pill${h===0?' on':''}" data-owl="${h}" onclick="setOwl(${h})">${lbl}</button>`).join('')+`<button type="button" class="setup-pill" id="owlCustomPill" onclick="setOwlCustom()">Custom…</button>`;
+
+  return `<div class="setup-hero">
+    <div class="setup-hero-badge">📘 Year 4 Medicine · ${ALL_LPS.length} learning points <span class="badge bp" style="margin-left:2px">Medicine</span></div>
+    <h1 class="setup-hero-title">Let's plan your study</h1>
+    <p class="setup-hero-sub">A few quick questions and we'll spread your learning points across the days you have until your exam.</p>
+  </div>
+
+  <div class="setup-step">
+    <div class="setup-q"><span class="setup-q-num">1</span><h3 class="setup-q-title">When are you studying?</h3></div>
+    <div class="setup-date-grid">
+      <div><label>Starting</label><input type="date" id="iS" value="${today}" oninput="upPrev()"/></div>
+      <div><label>Exam date</label><input type="date" id="iD" value="${dead}" oninput="upPrev()"/></div>
+    </div>
+    <div class="setup-buffer-row">
+      <span>Finish</span>
+      <div class="setup-stepper">
+        <button type="button" onclick="bumpBuf(-1)">−</button>
+        <input type="number" id="iB" value="3" min="0" max="90" oninput="upPrev()"/>
+        <button type="button" onclick="bumpBuf(1)">+</button>
+      </div>
+      <span>days before your exam</span>
     </div>
   </div>
-  <div class="card"><div class="card-title">Dates</div>
-    <div class="form-row"><label>Start date</label><input type="date" id="iS" value="${today}" oninput="upPrev()"/><div style="font-size:12px;color:var(--gray-400);margin-top:4px">The first day you'll begin studying.</div></div>
-    <div class="form-row"><label>Deadline</label><input type="date" id="iD" value="${dead}" oninput="upPrev()"/><div style="font-size:12px;color:var(--gray-400);margin-top:4px">Your exam or submission date. Learning points will be distributed up to this date.</div></div>
-    <div class="form-row"><label>Buffer days — finish this many days before the deadline</label><input type="number" id="iB" value="3" min="0" max="90" style="width:80px" oninput="upPrev()"/></div>
-    <div class="form-row"><label>Learning point order</label>
-      <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
-        <button id="oRand" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='random'?'on':''}" onclick="setOrder('random',this)">🔀 Randomised</button>
-        <button id="oSeq" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='sequential'?'on':''}" onclick="setOrder('sequential',this)">1→6 Topic order</button>
-        <button id="oCust" class="chip ${Array.isArray(lpOrder)?'on':''}" onclick="setOrder('custom',this)">Custom order</button>
+
+  <div class="setup-step">
+    <div class="setup-q"><span class="setup-q-num">2</span><h3 class="setup-q-title">What order should we work through?</h3></div>
+    <div class="chips">
+      <button id="oRand" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='random'?'on':''}" onclick="setOrder('random',this)">🔀 Random mix</button>
+      <button id="oSeq" class="chip ${!Array.isArray(lpOrder)&&lpOrder==='sequential'?'on':''}" onclick="setOrder('sequential',this)">📚 Topic by topic</button>
+      <button id="oCust" class="chip ${Array.isArray(lpOrder)?'on':''}" onclick="setOrder('custom',this)">⚙️ My own order</button>
+    </div>
+    <div id="customTopicOrder" style="display:${Array.isArray(lpOrder)?'block':'none'};margin-top:12px">
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Drag to set the order you'd like:</div>
+      <div id="topicDragList" style="display:flex;flex-direction:column;gap:4px">
+        ${lpTopicOrder.map(t=>`<div draggable="true" data-topic="${t}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;cursor:grab;font-size:12px;color:var(--gray-700);user-select:none">
+          <span style="color:var(--gray-300);font-size:14px">⠿</span>
+          <span style="font-size:10px;font-weight:600;color:var(--gray-400);min-width:16px">T${t}</span>
+          <span>${TNAMES[t-1]}</span>
+        </div>`).join('')}
       </div>
-      <div id="customTopicOrder" style="display:${Array.isArray(lpOrder)?'block':'none'};margin-top:10px">
-        <div style="font-size:12px;color:var(--gray-400);margin-bottom:6px">Drag to set your preferred topic order:</div>
-        <div id="topicDragList" style="display:flex;flex-direction:column;gap:4px">
-          ${lpTopicOrder.map(t=>`<div draggable="true" data-topic="${t}" style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;cursor:grab;font-size:12px;color:var(--gray-700);user-select:none">
-            <span style="color:var(--gray-300);font-size:14px">⠿</span>
-            <span style="font-size:10px;font-weight:600;color:var(--gray-400);min-width:16px">T${t}</span>
-            <span>${TNAMES[t-1]}</span>
-          </div>`).join('')}
+    </div>
+    <div id="seqTopicPreview" style="display:${!Array.isArray(lpOrder)&&lpOrder==='sequential'?'block':'none'};margin-top:12px">
+      <div style="font-size:12px;color:var(--gray-500);margin-bottom:8px">Default order — T1 first, then T2, all the way through T6:</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${[1,2,3,4,5,6].map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:6px;font-size:12px;color:var(--gray-700)">
+          <span style="font-size:10px;font-weight:600;color:var(--gray-400);min-width:16px">T${t}</span>
+          <span>${TNAMES[t-1]}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-step">
+    <div class="setup-q"><span class="setup-q-num">3</span><h3 class="setup-q-title">When's the latest time you study?</h3></div>
+    <p class="setup-q-hint">If you study past midnight, today's session won't roll over until the time you pick.</p>
+    <div class="setup-pill-row" id="owlPills">${owlPills}</div>
+    <div id="owlCustomRow" style="display:none;margin-top:12px;align-items:center;gap:10px;font-size:13px;color:var(--gray-700);flex-wrap:wrap">
+      <span>Roll over at</span>
+      <div class="setup-stepper">
+        <button type="button" onclick="bumpOwl(-1)">−</button>
+        <input type="number" id="owlCustomInput" min="0" max="6" value="0" oninput="updOwlCustom(this.value)"/>
+        <button type="button" onclick="bumpOwl(1)">+</button>
+      </div>
+      <span id="owlCustomLbl">am</span>
+    </div>
+  </div>
+
+  <div class="setup-preview" id="pvBox">
+    <div class="setup-preview-label">Your plan at a glance</div>
+    <div id="pv"></div>
+  </div>
+
+  <div class="setup-advanced">
+    <div class="setup-advanced-hdr" onclick="setupToggle('advBody','advArrow')">
+      <div class="setup-advanced-hdr-title">More options <span style="color:var(--gray-400);font-weight:400">— balance difficulty, skip points</span></div>
+      <span id="advArrow" style="color:var(--gray-400);font-size:12px">▸</span>
+    </div>
+    <div id="advBody" class="setup-advanced-body" style="display:none">
+      <div style="padding-top:16px;margin-bottom:20px">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+          <input type="checkbox" id="iCmx" onchange="lpComplexityMode=this.checked" style="margin-top:3px;flex-shrink:0"/>
+          <div>
+            <div style="font-size:13px;color:var(--gray-700);font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:8px">Balance hard topics across days <span class="setup-beta">beta</span></div>
+            <div style="font-size:12px;color:var(--gray-500);line-height:1.55">Every learning point has been pre-scored 1–3 by AI for cognitive difficulty (rote facts score low, deep clinical reasoning scores high). When this is on, points are distributed by total difficulty rather than raw count — so a day with one tough LP might sit next to a day with two easier ones, keeping daily effort roughly even.</div>
+          </div>
+        </label>
+      </div>
+      <div style="border-top:1px solid var(--gray-100);padding-top:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:13px;font-weight:500;color:var(--gray-700)">Already know something? Skip it.</div>
+          <span id="excCount" style="font-size:11px;color:var(--amber-dark);display:none">0 excluded</span>
+        </div>
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:10px;line-height:1.5">Tick any points you've already studied. They'll count as completed.</div>
+        <div style="margin-bottom:8px;display:flex;gap:6px">
+          <input type="text" id="lpSearch" placeholder="Search learning points…" oninput="filterSetupLPs(this.value)" style="flex:1;font-size:12px"/>
+          <button class="btn sm" onclick="document.querySelectorAll('[data-lpid]').forEach(cb=>{cb.checked=false;lpExcluded.delete(parseInt(cb.dataset.lpid))});document.querySelectorAll('[data-topic]').forEach(h=>h.textContent=h.textContent.replace('☑','☐'));updExcCount();upPrev()">Clear</button>
+        </div>
+        <div id="lpExcludeList" style="max-height:280px;overflow-y:auto;border:1px solid var(--gray-100);border-radius:8px;padding:8px 10px">
+          ${lpListHtml}
         </div>
       </div>
     </div>
-    <div class="form-row"><label>Complexity-weighted scheduling</label>
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--gray-600);margin-top:4px">
-        <input type="checkbox" id="iCmx" onchange="lpComplexityMode=this.checked"/>
-        Distribute LPs by complexity score rather than equal count
-      </label>
-      <div style="font-size:12px;color:var(--gray-400);margin-top:6px;line-height:1.6">Enabling this distributes learning points based on AI-assigned complexity scores, so each day has a similar cognitive load rather than just an equal number of points.</div>
-    </div>
-    <div class="form-row"><label>New day starts after</label>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-        <input type="number" id="iOwl" value="0" min="0" max="6" style="width:60px" oninput="updSetupOwl(this.value)"/>
-        <span style="font-size:13px;color:var(--gray-500)" id="iOwlDesc">midnight (default)</span>
-      </div>
-      <div style="font-size:12px;color:var(--gray-400);margin-top:5px">Set to the latest time you think you'll be studying. If you study past midnight, today's session won't roll over until then.</div>
-    </div>
-    <div id="pv"></div></div>
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="document.getElementById('excBody').style.display=document.getElementById('excBody').style.display==='none'?'block':'none';this.querySelector('.excArrow').textContent=document.getElementById('excBody').style.display==='none'?'▸':'▾'">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="card-title" style="margin:0">Exclude learning points</div>
-        <span id="excCount" style="font-size:12px;color:var(--amber-dark);display:none">0 excluded</span>
-      </div>
-      <span class="excArrow" style="color:var(--gray-400);font-size:12px">▸</span>
-    </div>
-    <div id="excBody" style="display:none;margin-top:12px">
-      <div style="font-size:13px;color:var(--gray-500);margin-bottom:12px;line-height:1.6">Tick any LPs you have already studied or wish to skip. They will be marked as completed and not included in the schedule.</div>
-      <div style="margin-bottom:8px;display:flex;gap:6px">
-        <input type="text" id="lpSearch" placeholder="Search learning points…" oninput="filterSetupLPs(this.value)" style="flex:1;font-size:12px"/>
-        <button class="btn sm" onclick="document.querySelectorAll('[data-lpid]').forEach(cb=>{cb.checked=false;lpExcluded.delete(parseInt(cb.dataset.lpid))});document.querySelectorAll('[data-topic]').forEach(h=>h.textContent=h.textContent.replace('☑','☐'));updExcCount();upPrev()">Clear all</button>
-      </div>
-      <div id="lpExcludeList" style="max-height:300px;overflow-y:auto;border:1px solid var(--gray-100);border-radius:var(--radius-sm);padding:8px 10px">
-        ${lpListHtml}
-      </div>
-    </div>
   </div>
+
+  <div class="setup-tips">
+    <div class="setup-tips-hdr" onclick="setupToggle('tipsBody','tipsArrow')"><span>📌 Keeping your progress safe</span><span id="tipsArrow" style="margin-left:auto;color:var(--gray-400)">▸</span></div>
+    <ul id="tipsBody" class="setup-tips-body" style="display:none">
+      <li>Use the same browser on the same device each time.</li>
+      <li>Export your progress regularly from Settings.</li>
+      <li>Avoid clearing browser data — export first if you need to.</li>
+      <li>Don't use incognito mode — progress won't be saved.</li>
+    </ul>
+  </div>
+
   <div id="se" style="display:none" class="alert danger"></div>
-  <button class="btn primary full" onclick="startPlan()">Create my study plan</button>
-  <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--gray-400)">Already have a progress file? <label style="color:var(--blue);cursor:pointer;text-decoration:underline">Import it<input type="file" accept=".json" onchange="importProgress(this)" style="display:none"/></label></div>`;
+  <button class="setup-start" onclick="startPlan()">Start studying →</button>
+  <div class="setup-import">Already have a progress file? <label>Import it<input type="file" accept=".json" onchange="importProgress(this)" style="display:none"/></label></div>
+  <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--gray-300)">Last updated 14 May 2026</div>`;
+}
+
+function bumpBuf(d){
+  const inp=document.getElementById('iB');if(!inp)return;
+  inp.value=Math.max(0,Math.min(90,(parseInt(inp.value)||0)+d));
+  upPrev();
+}
+
+function setOwl(h){
+  lpOwlHours=Math.min(6,Math.max(0,h|0));
+  document.querySelectorAll('#owlPills .setup-pill').forEach(b=>{
+    const v=b.dataset.owl;
+    b.classList.toggle('on',v!==undefined&&parseInt(v)===lpOwlHours);
+  });
+  const row=document.getElementById('owlCustomRow');if(row)row.style.display='none';
+}
+function setOwlCustom(){
+  document.querySelectorAll('#owlPills .setup-pill').forEach(b=>b.classList.toggle('on',b.id==='owlCustomPill'));
+  const row=document.getElementById('owlCustomRow');if(row)row.style.display='flex';
+  const inp=document.getElementById('owlCustomInput');
+  if(inp){inp.value=lpOwlHours;inp.focus();inp.select();}
+  updOwlCustomLbl();
+}
+function bumpOwl(d){
+  const inp=document.getElementById('owlCustomInput');if(!inp)return;
+  inp.value=Math.max(0,Math.min(6,(parseInt(inp.value)||0)+d));
+  updOwlCustom(inp.value);
+}
+function updOwlCustom(v){
+  lpOwlHours=Math.min(6,Math.max(0,parseInt(v)||0));
+  updOwlCustomLbl();
+}
+function updOwlCustomLbl(){
+  const lbl=document.getElementById('owlCustomLbl');if(!lbl)return;
+  lbl.textContent=lpOwlHours===0?'(midnight)':'am';
+}
+
+function setupToggle(bodyId,arrowId){
+  const el=document.getElementById(bodyId);if(!el)return;
+  const open=el.style.display==='none';
+  el.style.display=open?(el.tagName==='UL'?'block':'block'):'none';
+  const a=document.getElementById(arrowId);if(a)a.textContent=open?'▾':'▸';
 }
 
 let lpOrder='random';
@@ -615,7 +703,9 @@ function setOrder(o,el){
   document.querySelectorAll('#oRand,#oSeq,#oCust').forEach(b=>b&&b.classList.remove('on'));
   el.classList.add('on');
   const customList=document.getElementById('customTopicOrder');
+  const seqPreview=document.getElementById('seqTopicPreview');
   if(customList) customList.style.display=o==='custom'?'block':'none';
+  if(seqPreview) seqPreview.style.display=o==='sequential'?'block':'none';
 }
 
 function initDragDrop(){
@@ -686,9 +776,26 @@ function togT(t,el){if(selTopics.has(t)){selTopics.delete(t);el.classList.remove
 
 function upPrev(){
   const s=document.getElementById('iS')?.value,d=document.getElementById('iD')?.value,b=parseInt(document.getElementById('iB')?.value)||0;
-  const lps=ALL_LPS.filter(l=>selTopics.has(l.topic)&&!lpExcluded.has(l.id)),box=document.getElementById('pv');if(!box)return;
-  if(s&&d){const days=Math.max(1,diffDays(pd(s),addDays(pd(d),-b-1)));box.innerHTML=`<div class="preview">${lps.length} points · ${days} study days · ~${Math.ceil(lps.length/days)} per day · ${b} buffer day${b!==1?'s':''}${lpExcluded.size>0?` · <span style="color:var(--amber-dark)">${lpExcluded.size} excluded</span>`:''}</div>`;}
-  else box.innerHTML=`<div class="preview">${lps.length} learning points selected</div>`;
+  const lps=ALL_LPS.filter(l=>selTopics.has(l.topic)&&!lpExcluded.has(l.id)),box=document.getElementById('pv'),pvBox=document.getElementById('pvBox');if(!box)return;
+  if(pvBox){pvBox.classList.remove('warn','danger');}
+  if(s&&d&&pd(s)<pd(d)){
+    const days=Math.max(1,diffDays(pd(s),addDays(pd(d),-b-1)));
+    const perDay=Math.ceil(lps.length/days);
+    const tone=perDay>5?'danger':perDay===5?'warn':null;
+    if(pvBox&&tone)pvBox.classList.add(tone);
+    const note=[
+      b>0?`Finishing ${b} day${b!==1?'s':''} before your exam`:null,
+      lpExcluded.size>0?`${lpExcluded.size} point${lpExcluded.size!==1?'s':''} skipped`:null,
+    ].filter(Boolean).join(' · ');
+    const loadMsg=tone==='danger'?`⚠ That's a heavy daily load. Try starting earlier, pushing your exam date back, or lowering your buffer days.`:tone==='warn'?`⚡ A solid daily load — manageable, but no slack.`:null;
+    box.innerHTML=`<div class="setup-preview-stats">
+      <div class="setup-preview-stat"><div class="setup-preview-stat-val">${lps.length}</div><div class="setup-preview-stat-lbl">learning points</div></div>
+      <div class="setup-preview-stat"><div class="setup-preview-stat-val">${days}</div><div class="setup-preview-stat-lbl">study days</div></div>
+      <div class="setup-preview-stat"><div class="setup-preview-stat-val">~${perDay}</div><div class="setup-preview-stat-lbl">per day</div></div>
+    </div>${loadMsg?`<div class="setup-preview-warn-msg">${loadMsg}</div>`:''}${note?`<div class="setup-preview-note">${note}</div>`:''}`;
+  } else {
+    box.innerHTML=`<div class="setup-preview-empty">Pick a start date and exam date to see your plan</div>`;
+  }
 }
 
 function startPlan(){
