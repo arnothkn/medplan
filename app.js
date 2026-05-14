@@ -1966,8 +1966,11 @@ function renderCalendarGrid(){
 
       let bg='transparent',color='var(--gray-300)',border='none',title='';
       const isFuture=dateStr>today;
-      const snoozedCount=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===dateStr;}).length;
-      const totalCount=isToday?(d?d.lps.length+snoozedCount:0):activeLpCount(d)+snoozedCount;
+      const returningIds=new Set(Object.entries(state.snoozed||{}).filter(([,s])=>{const r=typeof s==='string'?s:s.returnDate;return r===dateStr;}).map(([id])=>parseInt(id)));
+      const snoozedCount=returningIds.size;
+      const dayLpIds=new Set((d&&d.lps?d.lps:[]).map(lp=>lp.id));
+      const extraReturning=[...returningIds].filter(id=>!dayLpIds.has(id)).length;
+      const totalCount=isToday?(d?d.lps.length+extraReturning:0):activeLpCount(d)+extraReturning;
 
       if(!inRange){
         bg='transparent';color='var(--gray-200)';
