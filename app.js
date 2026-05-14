@@ -485,7 +485,7 @@ function renderSetup(){
     </div>`;
   }).join('');
 
-  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 12 May 2026</div></div>
+  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 14 May 2026</div></div>
   <div class="card" style="background:var(--gray-50)">
     <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
     <div style="border-top:1px solid var(--gray-200);padding-top:12px">
@@ -1699,10 +1699,12 @@ function renderProgress(){
     ${arList}
   </div>`;
 
+  const unratedCount=done-m[1]-m[2]-m[3];
   return`<div class="metrics">
     <div class="metric" onclick="state.historyFilter=[3];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--green)">${m[3]}</div><div class="lbl">Confident</div></div>
     <div class="metric" onclick="state.historyFilter=[2];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--amber)">${m[2]}</div><div class="lbl">Getting there</div></div>
     <div class="metric" onclick="state.historyFilter=[1];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--red)">${m[1]}</div><div class="lbl">Needs work</div></div>
+    <div class="metric" onclick="state.historyFilter=[0];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--gray-500)">${unratedCount}</div><div class="lbl">Unrated</div></div>
   </div>
   <div class="card"><div class="card-title">Overall coverage</div><div class="legend"><span><div class="ldot" style="background:var(--green)"></div>Confident</span><span><div class="ldot" style="background:var(--amber)"></div>Getting there</span><span><div class="ldot" style="background:var(--red)"></div>Needs work</span><span><div class="ldot" style="background:#9ca3af"></div>Unrated</span><span><div class="ldot" style="background:#fde68a"></div>Snoozed</span></div>${segBar(total,dl,12)}<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-top:5px"><span>${pct}% covered</span><span>${done}/${total} learning points</span></div></div>
   ${arCard}
@@ -2323,7 +2325,7 @@ function renderSettings(){
   <div class="card"><div class="card-title">About</div>
     <div style="font-size:13px;color:var(--gray-500);line-height:1.8">
       <div>JMP 2026 Study Planner</div>
-      <div style="font-size:12px;color:var(--gray-400)">Last updated: 12 May 2026</div>
+      <div style="font-size:12px;color:var(--gray-400)">Last updated: 14 May 2026</div>
     </div>
   </div>
   <div class="card"><div class="card-title">Danger zone</div><button class="btn danger" onclick="resetPlan()">Reset and start over</button></div>`;

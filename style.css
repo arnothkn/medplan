@@ -107,7 +107,7 @@ input:focus{outline:none;border-color:var(--green)}
 .seg-g{background:var(--green);transition:width .4s}
 .seg-a{background:var(--amber);transition:width .4s}
 .seg-r{background:var(--red);transition:width .4s}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .metric{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:14px;transition:border-color .15s}
 .metric:hover{border-color:var(--gray-400)}
 .metric .val{font-size:24px;font-weight:500;font-family:'DM Mono',monospace}
