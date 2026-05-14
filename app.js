@@ -314,21 +314,28 @@ function applyDayChange(){
 
 function recalc(st){
   const today=dsNow(),dl=pd(st.deadline),te=addDays(dl,-st.bufferDays-1);
-  // Sweep stale snoozes: any record whose returnDate has passed releases the LP
-  // back into the rotation. Without this, snoozed LPs whose landing day was
-  // wiped by a prior recalc end up "ghosted" — accounted for in state.snoozed
-  // but absent from every day's lps array.
+  // Sweep stale snoozes: only records strictly before today are stale. A record
+  // whose returnDate is today must survive this pass so the LP shows up as
+  // "returning today" — it gets re-injected onto today's day at the end of
+  // recalc.
   if(st.snoozed){
     Object.keys(st.snoozed).forEach(id=>{
       const s=st.snoozed[id];
       const rd=typeof s==='string'?s:s.returnDate;
-      if(rd<=today) delete st.snoozed[id];
+      if(rd<today) delete st.snoozed[id];
     });
   }
   const doneIds=new Set([
     ...st.days.filter(d=>d.completed).flatMap(d=>d.lps.map(l=>l.id)),
     ...(st.excludedIds||[])
   ]);
+  // Clear snooze records whose LP has since been completed or excluded —
+  // otherwise they'd be re-injected onto a future day below.
+  if(st.snoozed){
+    Object.keys(st.snoozed).forEach(id=>{
+      if(doneIds.has(parseInt(id))) delete st.snoozed[id];
+    });
+  }
   const snoozedIds=new Set(Object.keys(st.snoozed||{}).map(Number));
   let pending=st.allLPs.filter(l=>!doneIds.has(l.id)&&!snoozedIds.has(l.id));
   // Sort pending by the stored LP order
@@ -377,6 +384,29 @@ function recalc(st){
     ...nf.filter(d=>!skippedDayDates.has(d.date)),
     ...buf
   ].sort((a,b)=>a.date.localeCompare(b.date));
+  // Re-inject snoozed LPs onto their returnDate day. The pending-distribution
+  // above doesn't know about them (they're excluded from `pending`), so without
+  // this they'd vanish from every day's lps array even though state.snoozed
+  // still claims they're due back.
+  if(st.snoozed){
+    Object.keys(st.snoozed).forEach(idStr=>{
+      const id=parseInt(idStr);
+      const s=st.snoozed[idStr];
+      const rd=typeof s==='string'?s:s.returnDate;
+      const lp=st.allLPs.find(l=>l.id===id);
+      if(!lp) return;
+      let landingDay=st.days.find(d=>d.date===rd&&(!d.completed||d.isProtected));
+      if(!landingDay) landingDay=st.days.find(d=>d.date>rd&&!d.completed);
+      if(landingDay){
+        if(landingDay.isProtected){landingDay.isProtected=false;landingDay.isFreeDay=false;landingDay.completed=false;}
+        if(landingDay.isBuffer) landingDay.isBuffer=false;
+        if(!landingDay.lps.find(l=>l.id===id)) landingDay.lps.push(lp);
+      } else {
+        st.days.push({date:rd,lps:[lp],completed:false,skipped:false});
+        st.days.sort((a,b)=>a.date.localeCompare(b.date));
+      }
+    });
+  }
   lpIntegrityCheck(st);
 }
 
@@ -1041,8 +1071,11 @@ function getSnoozed(id){
   const s=state.snoozed&&state.snoozed[id];
   if(!s) return null;
   const returnDate=typeof s==='string'?s:s.returnDate;
-  // Clear the record if the return date has passed — snooze is no longer active
-  if(returnDate<=dsNow()){
+  // Clear the record only if the return date is strictly in the past. On the
+  // return day itself the snooze is still "active" — the LP is showing up in
+  // today's session as a returner and should display the "Returning today"
+  // badge, not be treated as un-snoozed.
+  if(returnDate<dsNow()){
     delete state.snoozed[id];
     return null;
   }
