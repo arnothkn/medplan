@@ -459,7 +459,7 @@ function render(){
   if(!state){app.innerHTML=renderSetup();upPrev();initDragDrop();return;}
   const tabs=['Dashboard','Study','Calendar','Progress','History','Notes','Search','Settings'];
   const modal=state.viewingDay?renderViewModal():state.pendingResolve?renderResolvePopup():'';
-  app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${state.allLPs.length} learning points</div></div>
+  app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${state.allLPs.length} learning points <span class="badge bp" style="margin-left:4px">Medicine</span></div></div>
   <div class="tabs">${tabs.map(t=>`<button class="tab${activeTab===t?' active':''}" onclick="sw('${t}')">${t}</button>`).join('')}</div>
   <div id="tc">${renderTab()}</div>`;
 }
@@ -524,7 +524,7 @@ function renderSetup(){
     </div>`;
   }).join('');
 
-  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics</div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 14 May 2026</div></div>
+  return `<div class="header"><div class="header-title">JMP 2026 Study Planner</div><div class="header-sub">Year 4 Medicine · ${ALL_LPS.length} learning points across 6 topics <span class="badge bp" style="margin-left:4px">Medicine</span></div><div style="font-size:11px;color:var(--gray-400);margin-top:3px">Last updated 14 May 2026</div></div>
   <div class="card" style="background:var(--gray-50)">
     <p style="font-size:13px;color:var(--gray-600);line-height:1.7;margin:0 0 12px">Plan and track your Year 4 Medicine learning points across all 6 topics. Each day you'll be given a set of points to study — rate them, snooze anything you need to revisit, and mark the day done. Study ahead to earn "protected" days off, and export your progress anytime to keep your progress safe.</p>
     <div style="border-top:1px solid var(--gray-200);padding-top:12px">

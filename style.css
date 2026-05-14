@@ -146,6 +146,7 @@ input:focus{outline:none;border-color:var(--green)}
 .bb{background:var(--blue-light);color:var(--blue)}
 .br{background:var(--red-light);color:var(--red-dark)}
 .bk{background:var(--gray-100);color:var(--gray-500)}
+.bp{background:#fce7f3;color:#be185d}
 .dash-hero{background:var(--green);border-radius:var(--radius);padding:22px 22px 18px;margin-bottom:14px;color:#fff}
 .dash-hero-lbl{font-size:12px;opacity:.8;margin-bottom:6px}
 .dash-hero-pct{font-size:44px;font-weight:500;font-family:'DM Mono',monospace;letter-spacing:-1px;line-height:1}
