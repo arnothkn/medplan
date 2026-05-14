@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Reward GIF gallery</title>
+<style>
+  body{font-family:'DM Sans',system-ui,sans-serif;background:#111;color:#eee;margin:0;padding:24px}
+  h1{font-size:18px;font-weight:500;margin:0 0 4px}
+  .sub{font-size:13px;color:#888;margin-bottom:20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+  .card img{width:100%;height:220px;object-fit:cover;background:#000;display:block}
+  .card .meta{padding:10px 12px;font-size:12px;line-height:1.4}
+  .card .idx{color:#888;font-family:'DM Mono',monospace;font-size:11px}
+  .card .desc{color:#ddd;margin-top:2px}
+  .card .url{color:#666;font-family:'DM Mono',monospace;font-size:10px;margin-top:6px;word-break:break-all;cursor:pointer}
+  .card .url:hover{color:#aaa}
+  .broken{outline:2px solid #b91c1c}
+  .broken .desc::after{content:" — failed to load";color:#f87171}
+</style>
+</head>
+<body>
+<h1>Reward GIF gallery</h1>
+<div class="sub">All 30 gifs that play after "Mark day as done". Click a URL to copy.</div>
+<div class="grid" id="grid"></div>
+<script>
+const REWARD_GIFS=[
+  ["https://media.giphy.com/media/SIADY2D8TEIGmLUqnJ/giphy.gif","person applauding"],
+  ["https://media.giphy.com/media/ely3apij36BJhoZ234/giphy.gif","sea otter clapping"],
+  ["https://media.giphy.com/media/8yZuEb7q6dlyP3L3cL/giphy.gif","Howie Mandel applauding"],
+  ["https://media.giphy.com/media/l4q7TIW8nEZYOJUf6/giphy.gif","Bravocado avocado cheer"],
+  ["https://media.giphy.com/media/3otPoS81loriI9sO8o/giphy.gif","Elf joyful excitement"],
+  ["https://media.giphy.com/media/QaXcpBEQRfD9pR3zk5/giphy.gif","Buddy the Elf jumping"],
+  ["https://media.giphy.com/media/o75ajIFH0QnQC3nCeD/giphy.gif","Erin fist pump"],
+  ["https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif","The Office disco dance"],
+  ["https://media.giphy.com/media/doPrWYzSG1Vao/giphy.gif","Jim Carrey tutu dance"],
+  ["https://media.giphy.com/media/MTclfCr4tVgis/giphy.gif","SpongeBob and Patrick cheering"],
+  ["https://media.giphy.com/media/pa37AAGzKXoek/giphy.gif","Carlton dance"],
+  ["https://media.giphy.com/media/bznNJlqAi4pBC/giphy.gif","George Costanza happy feet"],
+  ["https://media.giphy.com/media/14qb1Uhf40ndw4/giphy.gif","Gru and Minions dance"],
+  ["https://media.giphy.com/media/14MjVpzfpuzqE/giphy.gif","puppy with big eyes"],
+  ["https://media.giphy.com/media/FnsbzAybylCs8/giphy.gif","golden retriever affection"],
+  ["https://media.giphy.com/media/JcXKkxRGoC3qDhbi9d/giphy.gif","fluffy samoyed"],
+  ["https://media.giphy.com/media/IGjolIXrxrLhj2Rbr3/giphy.gif","husky smile"],
+  ["https://media.giphy.com/media/3ndAvMC5LFPNMCzq7m/giphy.gif","golden retriever goofy smile"],
+  ["https://media.giphy.com/media/dg5zhZ4NxhaxaA2Jp5/giphy.gif","golden retriever at beach"],
+  ["https://media.giphy.com/media/UuebWyG4pts3rboawU/giphy.gif","dog wiggling excitedly"],
+  ["https://media.giphy.com/media/yNvPaHz8LI4I4jKKws/giphy.gif","corgi silly"],
+  ["https://media.giphy.com/media/m5SLTWdACYbUe9Ge9F/giphy.gif","multiple happy dogs"],
+  ["https://media.giphy.com/media/4QSPtb1h6cI2cO1R9e/giphy.gif","dancing cat"],
+  ["https://media.giphy.com/media/dRcMsUUrnR8He/giphy.gif","cute kitten"],
+  ["https://media.giphy.com/media/TjSPQgowhhJdHgvnwA/giphy.gif","brown cat dancing"],
+  ["https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif","kitten belly scratches"],
+  ["https://media.giphy.com/media/C5UKBt10BGiEUpZ2bW/giphy.gif","kitten behhh"],
+];
+const grid=document.getElementById('grid');
+REWARD_GIFS.forEach(([url,desc],i)=>{
+  const card=document.createElement('div');
+  card.className='card';
+  card.innerHTML=`
+    <img src="${url}" alt="${desc}" onerror="this.parentNode.classList.add('broken')">
+    <div class="meta">
+      <div class="idx">#${String(i+1).padStart(2,'0')}</div>
+      <div class="desc">${desc}</div>
+      <div class="url" onclick="navigator.clipboard.writeText('${url}')">${url}</div>
+    </div>`;
+  grid.appendChild(card);
+});
+</script>
+</body>
+</html>

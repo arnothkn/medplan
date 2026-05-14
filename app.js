@@ -1571,6 +1571,131 @@ function noteRow(lp){
   </div>`;
 }
 
+const REWARD_GIFS=[
+  // "Great job" / applause vibe
+  "https://media.giphy.com/media/SIADY2D8TEIGmLUqnJ/giphy.gif", // person applauding
+  "https://media.giphy.com/media/ely3apij36BJhoZ234/giphy.gif", // sea otter clapping
+  "https://media.giphy.com/media/8yZuEb7q6dlyP3L3cL/giphy.gif", // Howie Mandel applauding
+  "https://media.giphy.com/media/l4q7TIW8nEZYOJUf6/giphy.gif", // Bravocado avocado cheer
+  "https://media.giphy.com/media/3otPoS81loriI9sO8o/giphy.gif", // Elf joyful excitement
+  "https://media.giphy.com/media/QaXcpBEQRfD9pR3zk5/giphy.gif", // Buddy the Elf jumping
+  "https://media.giphy.com/media/o75ajIFH0QnQC3nCeD/giphy.gif", // Erin fist pump
+  // Iconic funny dances
+  "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif", // The Office disco dance
+  "https://media.giphy.com/media/doPrWYzSG1Vao/giphy.gif", // Jim Carrey tutu dance
+  "https://media.giphy.com/media/MTclfCr4tVgis/giphy.gif", // SpongeBob and Patrick cheering
+  "https://media.giphy.com/media/pa37AAGzKXoek/giphy.gif", // Carlton dance
+  "https://media.giphy.com/media/bznNJlqAi4pBC/giphy.gif", // George Costanza happy feet
+  "https://media.giphy.com/media/14qb1Uhf40ndw4/giphy.gif", // Gru and Minions dance
+  // Cute dogs
+  "https://media.giphy.com/media/14MjVpzfpuzqE/giphy.gif", // puppy with big eyes
+  "https://media.giphy.com/media/FnsbzAybylCs8/giphy.gif", // golden retriever affection
+  "https://media.giphy.com/media/JcXKkxRGoC3qDhbi9d/giphy.gif", // fluffy samoyed
+  "https://media.giphy.com/media/IGjolIXrxrLhj2Rbr3/giphy.gif", // husky smile
+  "https://media.giphy.com/media/3ndAvMC5LFPNMCzq7m/giphy.gif", // golden retriever goofy smile
+  "https://media.giphy.com/media/dg5zhZ4NxhaxaA2Jp5/giphy.gif", // golden retriever at beach
+  "https://media.giphy.com/media/UuebWyG4pts3rboawU/giphy.gif", // dog wiggling excitedly
+  "https://media.giphy.com/media/yNvPaHz8LI4I4jKKws/giphy.gif", // corgi silly
+  "https://media.giphy.com/media/m5SLTWdACYbUe9Ge9F/giphy.gif", // multiple happy dogs
+  // Cute cats
+  "https://media.giphy.com/media/4QSPtb1h6cI2cO1R9e/giphy.gif", // dancing cat
+  "https://media.giphy.com/media/dRcMsUUrnR8He/giphy.gif", // cute kitten
+  "https://media.giphy.com/media/TjSPQgowhhJdHgvnwA/giphy.gif", // brown cat dancing
+  "https://media.giphy.com/media/3oriO0OEd9QIDdllqo/giphy.gif", // kitten belly scratches
+  "https://media.giphy.com/media/C5UKBt10BGiEUpZ2bW/giphy.gif", // kitten "behhh"
+];
+
+function launchConfetti(parent,durationMs){
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none';
+  const dpr=window.devicePixelRatio||1;
+  const resize=()=>{
+    canvas.width=parent.clientWidth*dpr;
+    canvas.height=parent.clientHeight*dpr;
+  };
+  parent.appendChild(canvas);
+  resize();
+  const ctx=canvas.getContext('2d');
+  const colors=['#1a9e6e','#d97706','#dc2626','#2563eb','#ec4899','#a855f7','#facc15'];
+  const N=160;
+  const parts=[];
+  const ox=canvas.width/2,oy=canvas.height;
+  for(let i=0;i<N;i++){
+    const angle=-Math.PI/2+(Math.random()-0.5)*Math.PI*0.9; // upward fan ~±80°
+    const speed=(8+Math.random()*10)*dpr;
+    parts.push({
+      x:ox+(Math.random()-0.5)*20*dpr,
+      y:oy,
+      w:(6+Math.random()*6)*dpr,
+      h:(8+Math.random()*8)*dpr,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed,
+      rot:Math.random()*Math.PI*2,
+      vrot:(Math.random()-0.5)*0.4,
+      color:colors[i%colors.length],
+      tilt:Math.random()*Math.PI,
+    });
+  }
+  const start=performance.now();
+  let raf;
+  const tick=now=>{
+    const elapsed=now-start;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(const p of parts){
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.25*dpr;
+      p.vx*=0.995;
+      p.rot+=p.vrot;
+      p.tilt+=0.08;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h*(0.6+0.4*Math.abs(Math.sin(p.tilt))));
+      ctx.restore();
+    }
+    if(elapsed<durationMs){
+      raf=requestAnimationFrame(tick);
+    }else{
+      cancelAnimationFrame(raf);
+      if(canvas.parentNode) canvas.parentNode.removeChild(canvas);
+    }
+  };
+  raf=requestAnimationFrame(tick);
+}
+
+let _lastRewardGifIdx=-1;
+function showRewardGif(){
+  if(!REWARD_GIFS.length) return;
+  let idx=Math.floor(Math.random()*REWARD_GIFS.length);
+  if(REWARD_GIFS.length>1 && idx===_lastRewardGifIdx) idx=(idx+1)%REWARD_GIFS.length;
+  _lastRewardGifIdx=idx;
+  const src=REWARD_GIFS[idx];
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:600;cursor:pointer;opacity:0;transition:opacity .2s;backdrop-filter:blur(0.5px);-webkit-backdrop-filter:blur(0.5px);overflow:hidden';
+  const img=document.createElement('img');
+  img.src=src;
+  img.style.cssText='max-width:min(90vw,420px);max-height:65vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.4);position:relative;z-index:1';
+  const caption=document.createElement('div');
+  caption.textContent='Day done — nice work!';
+  caption.style.cssText='color:#fff;font-family:inherit;font-size:15px;font-weight:500;letter-spacing:-0.2px;text-shadow:0 1px 6px rgba(0,0,0,.5);position:relative;z-index:1';
+  overlay.appendChild(img);
+  overlay.appendChild(caption);
+  let removed=false;
+  const close=()=>{
+    if(removed) return;
+    removed=true;
+    overlay.style.opacity='0';
+    setTimeout(()=>{ if(overlay.parentNode) overlay.parentNode.removeChild(overlay); },200);
+  };
+  overlay.onclick=close;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>{ overlay.style.opacity='1'; });
+  launchConfetti(overlay,4500);
+  setTimeout(close,5000);
+}
+
 function openNoteImage(src){
   const overlay=document.createElement('div');
   overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:300;cursor:pointer';
@@ -1620,6 +1745,7 @@ function markDone(){
   if(state.todayCompletedDatesDay!==dsNow()){state.todayCompletedDates=[];state.todayCompletedDatesDay=dsNow();}
   if(!state.todayCompletedDates.includes(dsNow())) state.todayCompletedDates.push(dsNow());
   recalc(state);save(state);sw('Dashboard');
+  showRewardGif();
 }
 
 function skipDay(){
@@ -1693,6 +1819,7 @@ function resolveAhead(takeOff){
   }
   state.aheadDate=null;state.pendingResolve=false;state.resolvedAhead=true;state.resolveShowWarning=false;
   sw('Dashboard');
+  showRewardGif();
 }
 
 function renderResolvePopup(){
