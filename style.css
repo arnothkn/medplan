@@ -112,6 +112,8 @@ input:focus{outline:none;border-color:var(--green)}
 .metric:hover{border-color:var(--gray-400)}
 .metric .val{font-size:24px;font-weight:500;font-family:'DM Mono',monospace}
 .metric .lbl{font-size:11px;color:var(--gray-400);margin-top:2px}
+.metric .lbl-pct{font-family:'DM Mono',monospace;color:var(--gray-300);margin-left:6px}
+.metric .lbl-pct::before{content:"·";margin-right:6px}
 .legend{display:flex;gap:14px;font-size:11px;color:var(--gray-500);margin-bottom:14px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:5px}
 .ldot{width:11px;height:11px;border-radius:50%;flex-shrink:0}

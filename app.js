@@ -322,7 +322,10 @@ function recalc(st){
     Object.keys(st.snoozed).forEach(id=>{
       const s=st.snoozed[id];
       const rd=typeof s==='string'?s:s.returnDate;
-      if(rd<today) delete st.snoozed[id];
+      if(rd<today){
+        logSnoozeEvent('sweep-stale',id,{returnDate:rd});
+        delete st.snoozed[id];
+      }
     });
   }
   const doneIds=new Set([
@@ -333,7 +336,13 @@ function recalc(st){
   // otherwise they'd be re-injected onto a future day below.
   if(st.snoozed){
     Object.keys(st.snoozed).forEach(id=>{
-      if(doneIds.has(parseInt(id))) delete st.snoozed[id];
+      if(doneIds.has(parseInt(id))){
+        const s=st.snoozed[id];
+        const rd=typeof s==='string'?s:s.returnDate;
+        const reason=(st.excludedIds||[]).includes(parseInt(id))?'excluded':'completed';
+        logSnoozeEvent('cleared',id,{returnDate:rd,reason});
+        delete st.snoozed[id];
+      }
     });
   }
   const snoozedIds=new Set(Object.keys(st.snoozed||{}).map(Number));
@@ -1067,6 +1076,12 @@ function renderViewModal(){
   </div>`;
 }
 
+function logSnoozeEvent(type, id, details){
+  if(!state.snoozeLog) state.snoozeLog=[];
+  state.snoozeLog.push({t:Date.now(),today:dsNow(),type,id:parseInt(id),...(details||{})});
+  if(state.snoozeLog.length>500) state.snoozeLog=state.snoozeLog.slice(-500);
+}
+
 function getSnoozed(id){
   const s=state.snoozed&&state.snoozed[id];
   if(!s) return null;
@@ -1076,6 +1091,7 @@ function getSnoozed(id){
   // today's session as a returner and should display the "Returning today"
   // badge, not be treated as un-snoozed.
   if(returnDate<dsNow()){
+    logSnoozeEvent('expired',id,{returnDate});
     delete state.snoozed[id];
     return null;
   }
@@ -1086,6 +1102,7 @@ function snoozeLP(id, days, sessionDate){
   if(!state.snoozed) state.snoozed={};
   const returnDate=ds(addDays(pd(sessionDate||dsNow()), days));
   state.snoozed[id]={returnDate, fromDate:sessionDate};
+  logSnoozeEvent('create',id,{fromDate:sessionDate,returnDate,days});
 
   // Remove from the session day
   const session=state.days.find(d=>d.date===sessionDate);
@@ -1733,11 +1750,13 @@ function renderProgress(){
   </div>`;
 
   const unratedCount=done-m[1]-m[2]-m[3];
+  const pctOf=n=>done?Math.round(n/done*100):0;
+  const pctSpan=n=>done?`<span class="lbl-pct">${pctOf(n)}%</span>`:'';
   return`<div class="metrics">
-    <div class="metric" onclick="state.historyFilter=[3];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--green)">${m[3]}</div><div class="lbl">Confident</div></div>
-    <div class="metric" onclick="state.historyFilter=[2];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--amber)">${m[2]}</div><div class="lbl">Getting there</div></div>
-    <div class="metric" onclick="state.historyFilter=[1];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--red)">${m[1]}</div><div class="lbl">Needs work</div></div>
-    <div class="metric" onclick="state.historyFilter=[0];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--gray-500)">${unratedCount}</div><div class="lbl">Unrated</div></div>
+    <div class="metric" onclick="state.historyFilter=[3];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--green)">${m[3]}</div><div class="lbl">Confident${pctSpan(m[3])}</div></div>
+    <div class="metric" onclick="state.historyFilter=[2];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--amber)">${m[2]}</div><div class="lbl">Getting there${pctSpan(m[2])}</div></div>
+    <div class="metric" onclick="state.historyFilter=[1];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--red)">${m[1]}</div><div class="lbl">Needs work${pctSpan(m[1])}</div></div>
+    <div class="metric" onclick="state.historyFilter=[0];save(state);sw('History')" style="cursor:pointer" title="View in History"><div class="val" style="color:var(--gray-500)">${unratedCount}</div><div class="lbl">Unrated${pctSpan(unratedCount)}</div></div>
   </div>
   <div class="card"><div class="card-title">Overall coverage</div><div class="legend"><span><div class="ldot" style="background:var(--green)"></div>Confident</span><span><div class="ldot" style="background:var(--amber)"></div>Getting there</span><span><div class="ldot" style="background:var(--red)"></div>Needs work</span><span><div class="ldot" style="background:#9ca3af"></div>Unrated</span><span><div class="ldot" style="background:#fde68a"></div>Snoozed</span></div>${segBar(total,dl,12)}<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-top:5px"><span>${pct}% covered</span><span>${done}/${total} learning points</span></div></div>
   ${arCard}
@@ -2197,6 +2216,26 @@ function renderSettings(){
         return 'LP#'+id+' '+expired+'\n  from: '+f+'\n  return: '+r+'\n  text: '+(lp?lp.text.slice(0,70)+'...':'unknown');
       }).join('\n\n')||'none';
 
+      const snoozeLogInfo=(()=>{
+        const log=state.snoozeLog||[];
+        if(!log.length) return 'no history recorded yet';
+        const counts={};
+        log.forEach(e=>{counts[e.type]=(counts[e.type]||0)+1;});
+        const summary='counts: '+Object.entries(counts).map(([k,v])=>k+':'+v).join('  ')+'\nentries: '+log.length+' (cap 500)\n';
+        const lines=log.slice().reverse().map(e=>{
+          const when=new Date(e.t).toISOString().replace('T',' ').slice(0,19);
+          const lp=state.allLPs.find(l=>l.id===e.id);
+          const tag=lp?'T'+lp.topic:'?';
+          const extras=[];
+          if(e.fromDate)extras.push('from:'+e.fromDate);
+          if(e.returnDate)extras.push('ret:'+e.returnDate);
+          if(e.days!=null)extras.push('days:'+e.days);
+          if(e.reason)extras.push(e.reason);
+          return when+'  ['+e.today+']  '+e.type.padEnd(13)+' LP#'+e.id+' '+tag+'  '+extras.join(' ');
+        }).join('\n');
+        return summary+'\n'+lines;
+      })();
+
       const daysInfo=state.days.map(d=>{
         const ret=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===d.date;}).length;
         const flags=[
@@ -2256,6 +2295,7 @@ function renderSettings(){
         ${preBlock('Additional readings ('+ADDITIONAL.length+')', arInfo, false)}
         ${preBlock('Notes ('+Object.keys(state.notes||{}).filter(id=>{const n=(state.notes||{})[id];return n&&(n.text||(n.images&&n.images.length));}).length+')', notesInfo, false)}
         ${preBlock('Snoozed LPs ('+Object.keys(state.snoozed||{}).length+') — queue: ['+([...pendingSnoozed].join(', ')||'empty')+']', snoozedInfo, false)}
+        ${preBlock('Snooze history ('+(state.snoozeLog||[]).length+' events, newest first)', snoozeLogInfo, false)}
         ${preBlock('Days ('+state.days.length+' total)', daysInfo, false)}
         ${preBlock('Mastery ('+Object.keys(m).length+' rated)', masteryInfo, false)}
         ${preBlock('LP counts by topic', topicsInfo, false)}
