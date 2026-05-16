@@ -459,9 +459,24 @@ function render(){
   if(!state){app.innerHTML=renderSetup();upPrev();initDragDrop();return;}
   const tabs=['Dashboard','Study','Calendar','Progress','History','Notes','Search','Settings'];
   const modal=state.viewingDay?renderViewModal():state.pendingResolve?renderResolvePopup():'';
-  app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP Study Planner<button onclick="showOnboarding()" title="Show intro" aria-label="Show intro" style="margin-left:8px;width:18px;height:18px;border-radius:50%;background:#f3f4f6;color:#9ca3af;border:none;font-size:11px;font-weight:500;cursor:pointer;vertical-align:4px;padding:0;line-height:18px;font-family:inherit">?</button></div><div class="header-sub">${state.allLPs.length} learning points <span class="header-eyebrow" style="margin-left:6px;margin-bottom:0;vertical-align:1px">Year 4 · Medicine</span></div></div>
-  <div class="tabs">${tabs.map(t=>`<button class="tab${activeTab===t?' active':''}" onclick="sw('${t}')">${t}</button>`).join('')}</div>
-  <div id="tc">${renderTab()}</div>`;
+  app.innerHTML=`${modal}<div class="header"><div class="header-title">JMP Study Planner</div><div class="header-sub">${state.allLPs.length} learning points <span class="header-eyebrow" style="margin-left:6px;margin-bottom:0;vertical-align:1px">Year 4 · Medicine</span></div></div>
+  <div class="tabs">${tabs.map(t=>`<button class="tab${activeTab===t?' active':''}" onclick="sw('${t}')">${t}</button>`).join('')}<button onclick="showOnboarding()" title="Show intro" aria-label="Show intro" style="margin-left:auto;align-self:center;width:18px;height:18px;border-radius:50%;background:#f3f4f6;color:#9ca3af;border:none;font-size:11px;font-weight:500;cursor:pointer;padding:0;line-height:18px;font-family:inherit;margin-bottom:0">?</button></div>
+  <div id="tc">${renderTab()}</div>
+  ${renderQuoteFooter()}`;
+}
+
+function dailyQuote(){
+  const list=window.MOTIVATIONAL_QUOTES||[];
+  if(!list.length) return null;
+  const d=dsNow(); // YYYY-MM-DD
+  let h=0;for(let i=0;i<d.length;i++){h=(h*31+d.charCodeAt(i))>>>0;}
+  return list[h%list.length];
+}
+function renderQuoteFooter(){
+  const q=dailyQuote();
+  if(!q) return '';
+  const author=q.author?`<span style="margin-left:6px">— ${q.author}</span>`:'';
+  return `<div style="margin:32px auto 24px;padding:14px 18px;max-width:560px;text-align:center;font-size:12px;color:var(--gray-400);line-height:1.6;font-style:italic;border-top:1px solid var(--gray-100);padding-top:18px">"${q.quote}"${author}</div>`;
 }
 
 let masterySnapshot=null;
@@ -641,7 +656,7 @@ function renderSetup(){
   <div id="se" style="display:none" class="alert danger"></div>
   <button class="setup-start" onclick="startPlan()">Start studying →</button>
   <div class="setup-import">Already have a progress file? <label>Import it<input type="file" accept=".json" onchange="importProgress(this)" style="display:none"/></label></div>
-  <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--gray-300)">Last updated 15 May 2026</div>`;
+  <div style="text-align:center;margin-top:14px;font-size:10px;color:var(--gray-300)">Last updated 17 May 2026</div>`;
 }
 
 function bumpBuf(d){
@@ -1611,35 +1626,12 @@ function launchConfetti(parent,durationMs){
   raf=requestAnimationFrame(tick);
 }
 
-let _lastRewardGifIdx=-1;
 function showRewardGif(){
-  if(!REWARD_GIFS.length) return;
-  let idx=Math.floor(Math.random()*REWARD_GIFS.length);
-  if(REWARD_GIFS.length>1 && idx===_lastRewardGifIdx) idx=(idx+1)%REWARD_GIFS.length;
-  _lastRewardGifIdx=idx;
-  const src=REWARD_GIFS[idx];
-  const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:600;cursor:pointer;opacity:0;transition:opacity .2s;backdrop-filter:blur(0.5px);-webkit-backdrop-filter:blur(0.5px);overflow:hidden';
-  const img=document.createElement('img');
-  img.src=src;
-  img.style.cssText='max-width:min(90vw,420px);max-height:65vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.4);position:relative;z-index:1';
-  const caption=document.createElement('div');
-  caption.textContent='Day done — nice work!';
-  caption.style.cssText='color:#fff;font-family:inherit;font-size:15px;font-weight:500;letter-spacing:-0.2px;text-shadow:0 1px 6px rgba(0,0,0,.5);position:relative;z-index:1';
-  overlay.appendChild(img);
-  overlay.appendChild(caption);
-  let removed=false;
-  const close=()=>{
-    if(removed) return;
-    removed=true;
-    overlay.style.opacity='0';
-    setTimeout(()=>{ if(overlay.parentNode) overlay.parentNode.removeChild(overlay); },200);
-  };
-  overlay.onclick=close;
-  document.body.appendChild(overlay);
-  requestAnimationFrame(()=>{ overlay.style.opacity='1'; });
-  launchConfetti(overlay,4500);
-  setTimeout(close,5000);
+  const layer=document.createElement('div');
+  layer.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:600;overflow:hidden';
+  document.body.appendChild(layer);
+  launchConfetti(layer,4500);
+  setTimeout(()=>{ if(layer.parentNode) layer.parentNode.removeChild(layer); },5000);
 }
 
 function openNoteImage(src){
@@ -1691,6 +1683,7 @@ function markDone(){
   if(state.todayCompletedDatesDay!==dsNow()){state.todayCompletedDates=[];state.todayCompletedDatesDay=dsNow();}
   if(!state.todayCompletedDates.includes(dsNow())) state.todayCompletedDates.push(dsNow());
   recalc(state);save(state);sw('Dashboard');
+  window.scrollTo(0,0);
   showRewardGif();
 }
 
@@ -2084,16 +2077,20 @@ function renderSched(){
   const today=dsNow();
   const rows=state.days.map(d=>{
     let dc='#d1d5db',badge='',cnt='';
-    const snoozedCount=Object.values(state.snoozed||{}).filter(s=>{const r=typeof s==='string'?s:s.returnDate;return r===d.date;}).length;
+    const returningIds=new Set(Object.entries(state.snoozed||{}).filter(([,s])=>{const r=typeof s==='string'?s:s.returnDate;return r===d.date;}).map(([id])=>parseInt(id)));
+    const snoozedCount=returningIds.size;
+    const dayLpIds=new Set((d.lps||[]).map(lp=>lp.id));
+    const extraReturning=[...returningIds].filter(id=>!dayLpIds.has(id)).length;
+    const isToday=d.date===today;
+    const displayCount=isToday?d.lps.length:(activeLpCount(d)+extraReturning);
     const amberDot=snoozedCount>0?`<div style="width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-left:4px" title="${snoozedCount} returning LP${snoozedCount!==1?'s':''}"></div>`:'';
     if(d.isProtected){dc='#a855f7';badge='<span class="badge" style="background:#f3e8ff;color:#7c3aed">protected</span>';cnt='no points';}
     else if(d.isBuffer){dc='#9ca3af';badge='<span class="badge bk">buffer</span>';cnt='—';}
-    else if(d.completed){dc='#1a9e6e';badge='<span class="badge bg">done</span>';cnt=d.lps.length+' pts';}
+    else if(d.completed){dc='#1a9e6e';badge='<span class="badge bg">done</span>';cnt=displayCount>0?displayCount+' pts':'';}
     else if(d.skipped){dc='#d97706';badge='<span class="badge ba">skipped</span>';}
-    else if(d.date===today){dc='#2563eb';badge='<span class="badge bb">today</span>';cnt=d.lps.length+' pts';}
-    else if(d.date<today){dc='#dc2626';badge='<span class="badge br">missed</span>';cnt=d.lps.length+' pts';}
-    else{cnt=d.lps.length+' pts';}
-    if(snoozedCount>0) cnt=(d.lps.length+snoozedCount)+' pts';
+    else if(isToday){dc='#2563eb';badge='<span class="badge bb">today</span>';cnt=displayCount+' pts';}
+    else if(d.date<today){dc='#dc2626';badge='<span class="badge br">missed</span>';cnt=displayCount+' pts';}
+    else{cnt=displayCount+' pts';}
     return`<div class="sched-row"><div class="sdot" style="background:${dc}"></div><div class="sdate">${fmt(d.date)}</div><div class="scnt" style="display:flex;align-items:center;gap:2px">${cnt}${amberDot}</div>${badge}</div>`;
   }).join('');
   return`<div class="card" style="padding:14px 16px">${rows}</div>`;
@@ -2581,7 +2578,8 @@ function renderSettings(){
   <div class="card"><div class="card-title">About</div>
     <div style="font-size:13px;color:var(--gray-500);line-height:1.8">
       <div>JMP 2026 Study Planner</div>
-      <div style="font-size:12px;color:var(--gray-400)">Last updated: 15 May 2026</div>
+      <div style="font-size:12px;color:var(--gray-400)">Built out of boredom and a need to procrastinate — by Arno</div>
+      <div style="font-size:12px;color:var(--gray-400)">Last updated: 17 May 2026</div>
     </div>
   </div>
   <div class="card"><div class="card-title">Danger zone</div><button class="btn danger" onclick="resetPlan()">Reset and start over</button></div>`;
